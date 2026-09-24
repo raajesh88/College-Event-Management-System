@@ -269,12 +269,31 @@ Follow these steps to test all functionality:
 
 ## 📡 REST API Reference
 
+### Authentication Endpoints
 | Method | Endpoint | Description | Protected |
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/auth/register` | Register new user (student or organizer) | No |
 | `POST` | `/api/auth/login` | Authenticate user & retrieve JWT token | No |
 | `GET` | `/api/auth/me` | Fetch profile of authenticated user | **Yes (Bearer JWT)** |
 | `GET` | `/api/health` | Backend health check | No |
+
+### Event Management Endpoints
+| Method | Endpoint | Description | Protected |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/events` | Browse all campus events (category, search, department filters) | No |
+| `GET` | `/api/events/:id` | Get single event details | No |
+| `GET` | `/api/events/organizer/my-events` | Fetch events hosted by authenticated organizer | **Yes (Organizer)** |
+| `GET` | `/api/events/organizer/participants` | Fetch registered student roster for organizer's events | **Yes (Organizer)** |
+| `POST` | `/api/events` | Publish a new college event | **Yes (Organizer)** |
+| `PUT` | `/api/events/:id` | Update event schedule, venue, capacity, or status | **Yes (Organizer)** |
+| `DELETE` | `/api/events/:id` | Delete event and cascade remove registrations | **Yes (Organizer)** |
+
+### Registration & Pass Endpoints
+| Method | Endpoint | Description | Protected |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/registrations/:eventId` | Register for an event & receive digital QR pass code | **Yes (Student)** |
+| `DELETE` | `/api/registrations/:eventId` | Withdraw event registration | **Yes (Student)** |
+| `GET` | `/api/registrations/my-registrations` | Fetch personal confirmed passes and event tickets | **Yes (Student)** |
 
 ---
 

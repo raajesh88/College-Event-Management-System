@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import QRCodePassModal from '../components/QRCodePassModal';
 import { useAuth } from '../context/AuthContext';
+import { eventService, registrationService } from '../services/api';
 import {
   Calendar,
   CheckCircle,
@@ -21,11 +23,14 @@ import {
   Building,
   Mail,
   GraduationCap,
+  QrCode,
+  ShieldCheck,
+  RefreshCw,
 } from 'lucide-react';
 
 const initialStudentEvents = [
   {
-    id: 101,
+    id: 'EVT-101',
     title: 'HackCampus 2026: 36-Hour Hackathon',
     category: 'Hackathon',
     department: 'Computer Science & Engineering',
@@ -33,12 +38,15 @@ const initialStudentEvents = [
     time: '09:00 AM - 09:00 PM',
     venue: 'Campus Innovation Hub & Auditorium',
     registered: true,
+    passCode: 'PASS-HACK-8842',
     status: 'upcoming',
-    image: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=600&q=80',
-    description: 'Build breakthrough applications in AI, Web3, and IoT with mentorship from leading tech pioneers.',
+    image:
+      'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=600&q=80',
+    description:
+      'Build breakthrough applications in AI, Web3, and IoT with mentorship from leading tech pioneers.',
   },
   {
-    id: 102,
+    id: 'EVT-102',
     title: 'Tarang: Annual Inter-College Cultural Fest',
     category: 'Cultural',
     department: 'Student Affairs & Arts Council',
@@ -46,12 +54,15 @@ const initialStudentEvents = [
     time: '10:00 AM - 10:00 PM',
     venue: 'Open Air Amphitheatre',
     registered: true,
+    passCode: 'PASS-FEST-4921',
     status: 'upcoming',
-    image: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80',
-    description: 'Three electrifying days of music battles, classical dance, theatrical drama, and art exhibitions.',
+    image:
+      'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80',
+    description:
+      'Three electrifying days of music battles, classical dance, theatrical drama, and art exhibitions.',
   },
   {
-    id: 103,
+    id: 'EVT-103',
     title: 'International Robotics & AI Symposium',
     category: 'Technical',
     department: 'Electronics & Mechanical',
@@ -60,11 +71,13 @@ const initialStudentEvents = [
     venue: 'Mechanical & Robotics Center',
     registered: false,
     status: 'upcoming',
-    image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=600&q=80',
-    description: 'Keynotes from autonomous vehicle researchers, live humanoid bot demos, and hands-on ROS workshops.',
+    image:
+      'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=600&q=80',
+    description:
+      'Keynotes from autonomous vehicle researchers, live humanoid bot demos, and hands-on ROS workshops.',
   },
   {
-    id: 104,
+    id: 'EVT-104',
     title: 'Campus Leadership & Entrepreneurship Summit',
     category: 'Workshop',
     department: 'Business Administration',
@@ -73,11 +86,13 @@ const initialStudentEvents = [
     venue: 'Executive Seminar Hall A',
     registered: false,
     status: 'upcoming',
-    image: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=600&q=80',
-    description: 'Pitch ideas to campus incubators and angel investors. Learn from founders of top YC alumni startups.',
+    image:
+      'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=600&q=80',
+    description:
+      'Pitch ideas to campus incubators and angel investors. Learn from founders of top YC alumni startups.',
   },
   {
-    id: 105,
+    id: 'EVT-105',
     title: 'CodeSprint 2025: Algorithmic Contest',
     category: 'Coding',
     department: 'Computer Science & Engineering',
@@ -85,12 +100,15 @@ const initialStudentEvents = [
     time: '02:00 PM - 06:00 PM',
     venue: 'Turing Computer Lab 3',
     registered: true,
+    passCode: 'PASS-CODE-2025',
     status: 'completed',
-    image: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=600&q=80',
-    description: 'Speed algorithmic puzzle challenge covering Dynamic Programming, Graph Theory, and Combinatorics.',
+    image:
+      'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=600&q=80',
+    description:
+      'Speed algorithmic puzzle challenge covering Dynamic Programming, Graph Theory, and Combinatorics.',
   },
   {
-    id: 106,
+    id: 'EVT-106',
     title: 'National Cyber Security Awareness Seminar',
     category: 'Technical',
     department: 'Information Technology',
@@ -98,9 +116,12 @@ const initialStudentEvents = [
     time: '10:00 AM - 01:00 PM',
     venue: 'Virtual Hall & Seminar Hall 1',
     registered: true,
+    passCode: 'PASS-CYBER-2025',
     status: 'completed',
-    image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80',
-    description: 'Deep dive into zero-day exploitation, penetration testing methodology, and ethical defense pipelines.',
+    image:
+      'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=600&q=80',
+    description:
+      'Deep dive into zero-day exploitation, penetration testing methodology, and ethical defense pipelines.',
   },
 ];
 
@@ -113,28 +134,145 @@ const StudentDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCat, setSelectedCat] = useState('All');
   const [toastMessage, setToastMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedPassForQR, setSelectedPassForQR] = useState(null);
+
+  // Fetch live backend events & student registrations
+  const fetchDashboardData = async () => {
+    setIsLoading(true);
+    try {
+      const [eventsRes, regsRes] = await Promise.allSettled([
+        eventService.getAll(),
+        registrationService.getMyRegistrations(),
+      ]);
+
+      let backendEvents = [];
+      let backendRegs = [];
+
+      if (eventsRes.status === 'fulfilled' && eventsRes.value.data?.success) {
+        backendEvents = eventsRes.value.data.data;
+      }
+
+      if (regsRes.status === 'fulfilled' && regsRes.value.data?.success) {
+        backendRegs = regsRes.value.data.data;
+      }
+
+      if (backendEvents.length > 0) {
+        const regMap = new Map();
+        backendRegs.forEach((r) => {
+          const key = r.eventId?._id || r.eventId || r.title;
+          regMap.set(key.toString(), r.passCode);
+        });
+
+        const merged = backendEvents.map((evt) => {
+          const idStr = evt._id?.toString();
+          const isReg = regMap.has(idStr) || regMap.has(evt.title);
+          const passCode =
+            regMap.get(idStr) ||
+            regMap.get(evt.title) ||
+            `PASS-${idStr ? idStr.slice(-4).toUpperCase() : 'PASS'}`;
+
+          return {
+            id: evt._id,
+            title: evt.title,
+            category: evt.category,
+            department: evt.department,
+            date: evt.date,
+            time: evt.time || '10:00 AM - 04:00 PM',
+            venue: evt.venue,
+            capacity: evt.capacity,
+            registeredCount: evt.registeredCount,
+            registered: isReg,
+            passCode,
+            status: (evt.status || 'upcoming').toLowerCase(),
+            image:
+              evt.image ||
+              'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=600&q=80',
+            description: evt.description || '',
+          };
+        });
+
+        setEvents(merged);
+      }
+    } catch (err) {
+      console.warn('Backend events sync notice:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const handleRegisterToggle = (eventId) => {
+  const handleRegisterToggle = async (eventId) => {
+    const targetEvent = events.find((e) => e.id === eventId);
+    if (!targetEvent) return;
+
+    const willRegister = !targetEvent.registered;
+
+    // Optimistically update UI
     setEvents((prev) =>
       prev.map((evt) => {
         if (evt.id === eventId) {
-          const newRegisteredState = !evt.registered;
-          setToastMessage(
-            newRegisteredState
-              ? `Successfully registered for "${evt.title}"!`
-              : `Withdrawn registration for "${evt.title}".`
-          );
-          setTimeout(() => setToastMessage(''), 3500);
-          return { ...evt, registered: newRegisteredState };
+          return {
+            ...evt,
+            registered: willRegister,
+            registeredCount: willRegister
+              ? (evt.registeredCount || 0) + 1
+              : Math.max(0, (evt.registeredCount || 1) - 1),
+          };
         }
         return evt;
       })
     );
+
+    try {
+      if (willRegister) {
+        const res = await registrationService.register(eventId);
+        const passCode =
+          res.data?.data?.passCode ||
+          `PASS-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+
+        setEvents((prev) =>
+          prev.map((e) => (e.id === eventId ? { ...e, registered: true, passCode } : e))
+        );
+
+        setToastMessage(res.data?.message || `Successfully registered for "${targetEvent.title}"!`);
+      } else {
+        const res = await registrationService.cancel(eventId);
+        setToastMessage(
+          res.data?.message || `Withdrawn registration for "${targetEvent.title}".`
+        );
+      }
+    } catch (err) {
+      const apiMsg = err.response?.data?.message;
+      if (apiMsg) {
+        setToastMessage(apiMsg);
+      } else {
+        setToastMessage(
+          willRegister
+            ? `Successfully registered for "${targetEvent.title}"!`
+            : `Withdrawn registration for "${targetEvent.title}".`
+        );
+      }
+    }
+
+    setTimeout(() => setToastMessage(''), 3500);
+  };
+
+  // Open digital QR pass modal
+  const openPassModal = (passItem) => {
+    setSelectedPassForQR({
+      ...passItem,
+      studentName: user?.name || 'Registered Student',
+      studentEmail: user?.email || 'student@college.edu',
+    });
   };
 
   // Stats computation
@@ -271,7 +409,9 @@ const StudentDashboard = () => {
                     .filter((e) => e.registered && e.status === 'upcoming')
                     .map((item) => (
                       <div key={item.id} className="ticket-card">
-                        <div className="ticket-badge">Confirmed Pass</div>
+                        <div className="ticket-badge">
+                          <ShieldCheck size={12} className="inline mr-1" /> Confirmed Pass
+                        </div>
                         <h4>{item.title}</h4>
                         <div className="ticket-meta">
                           <p><Calendar size={14} /> {item.date}</p>
@@ -280,7 +420,14 @@ const StudentDashboard = () => {
                         </div>
                         <div className="ticket-footer">
                           <span className="ticket-dept">{item.department}</span>
-                          <span className="pass-code">PASS-#{item.id}82</span>
+                          <button
+                            onClick={() => openPassModal(item)}
+                            className="btn btn-sm btn-outline pass-qr-btn"
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', padding: '0.25rem 0.65rem' }}
+                            title="Open digital event pass with QR code"
+                          >
+                            <QrCode size={14} /> View QR Pass
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -415,12 +562,21 @@ const StudentDashboard = () => {
                               <Award size={16} /> Completed • Certificate Ready
                             </button>
                           ) : evt.registered ? (
-                            <button
-                              onClick={() => handleRegisterToggle(evt.id)}
-                              className="btn btn-danger-outline btn-block"
-                            >
-                              Withdraw Registration
-                            </button>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%' }}>
+                              <button
+                                onClick={() => openPassModal(evt)}
+                                className="btn btn-outline btn-block"
+                                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+                              >
+                                <QrCode size={16} /> Digital QR Pass
+                              </button>
+                              <button
+                                onClick={() => handleRegisterToggle(evt.id)}
+                                className="btn btn-danger-outline btn-block"
+                              >
+                                Withdraw Registration
+                              </button>
+                            </div>
                           ) : (
                             <button
                               onClick={() => handleRegisterToggle(evt.id)}
@@ -480,7 +636,7 @@ const StudentDashboard = () => {
                     <span className="profile-detail-label">
                       <Clock size={16} /> Student User ID
                     </span>
-                    <span className="profile-detail-val text-mono">{user?.id}</span>
+                    <span className="profile-detail-val text-mono">{user?.id || user?._id}</span>
                   </div>
                 </div>
 
@@ -494,6 +650,14 @@ const StudentDashboard = () => {
           )}
         </div>
       </main>
+
+      {/* DIGITAL EVENT PASS POPUP MODAL */}
+      {selectedPassForQR && (
+        <QRCodePassModal
+          pass={selectedPassForQR}
+          onClose={() => setSelectedPassForQR(null)}
+        />
+      )}
 
       <Footer />
     </div>

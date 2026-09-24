@@ -80,4 +80,23 @@ export const authService = {
   isAuthenticated: () => !!localStorage.getItem('token'),
 };
 
+// Event Service Endpoints
+export const eventService = {
+  getAll: (params) => API.get('/events', { params }),
+  getById: (id) => API.get(`/events/${id}`),
+  getMyEvents: () => API.get('/events/organizer/my-events'),
+  getParticipants: (params) => API.get('/events/organizer/participants', { params }),
+  create: (data) => API.post('/events', data),
+  update: (id, data) => API.put(`/events/${id}`, data),
+  delete: (id) => API.delete(`/events/${id}`),
+};
+
+// Registration Service Endpoints
+export const registrationService = {
+  register: (eventId) => API.post(`/registrations/${eventId}`),
+  cancel: (eventId) => API.delete(`/registrations/${eventId}`),
+  getMyRegistrations: () => API.get('/registrations/my-registrations'),
+};
+
 export default API;
+

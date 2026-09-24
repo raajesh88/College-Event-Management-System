@@ -7,12 +7,17 @@ dotenv.config();
 
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
+const eventRoutes = require('./routes/eventRoutes');
+const registrationRoutes = require('./routes/registrationRoutes');
+const { seedDefaultEvents } = require('./controllers/eventController');
 
 // Initialize Express app
 const app = express();
 
-// Connect to MongoDB Database
-connectDB();
+// Connect to MongoDB Database and seed initial events if empty
+connectDB().then(() => {
+  seedDefaultEvents();
+});
 
 // Core Middleware - Deployment ready CORS
 const allowedOrigins = [
@@ -60,6 +65,8 @@ app.get('/', (req, res) => {
     documentation: 'See README.md',
     endpoints: {
       auth: '/api/auth',
+      events: '/api/events',
+      registrations: '/api/registrations',
       health: '/api/health',
     },
   });
@@ -76,6 +83,8 @@ app.get('/api/health', (req, res) => {
 
 // Mount Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/registrations', registrationRoutes);
 
 // 404 Route Not Found Handler
 app.use((req, res) => {
@@ -101,5 +110,7 @@ app.listen(PORT, () => {
   console.log(`College Event Management Server running on port ${PORT}`);
   console.log(`API URL: http://localhost:${PORT}/api`);
   console.log(`Auth Endpoints: http://localhost:${PORT}/api/auth`);
+  console.log(`Events Endpoints: http://localhost:${PORT}/api/events`);
+  console.log(`Registration Endpoints: http://localhost:${PORT}/api/registrations`);
   console.log(`===============================================`);
 });

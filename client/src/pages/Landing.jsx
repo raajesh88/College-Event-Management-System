@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { eventService } from '../services/api';
 import {
   Compass,
   CheckCircle2,
@@ -71,14 +72,44 @@ const upcomingEventsData = [
 ];
 
 const Landing = () => {
+  const [eventsList, setEventsList] = useState(upcomingEventsData);
   const [selectedCategory, setSelectedCategory] = useState('All');
+
+  useEffect(() => {
+    const fetchLiveEvents = async () => {
+      try {
+        const res = await eventService.getAll({ status: 'Upcoming' });
+        if (res.data?.success && res.data.data.length > 0) {
+          const formatted = res.data.data.map((e) => ({
+            id: e._id,
+            title: e.title,
+            category: e.category,
+            date: e.date,
+            time: e.time || '10:00 AM - 04:00 PM',
+            venue: e.venue,
+            department: e.department,
+            spotsLeft: Math.max(0, (e.capacity || 100) - (e.registeredCount || 0)),
+            image:
+              e.image ||
+              'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=700&q=80',
+            description: e.description || '',
+          }));
+          setEventsList(formatted);
+        }
+      } catch (err) {
+        console.warn('Landing live events sync notice:', err);
+      }
+    };
+
+    fetchLiveEvents();
+  }, []);
 
   const categories = ['All', 'Hackathon', 'Cultural', 'Technical', 'Workshop'];
 
   const filteredEvents =
     selectedCategory === 'All'
-      ? upcomingEventsData
-      : upcomingEventsData.filter((e) => e.category === selectedCategory);
+      ? eventsList
+      : eventsList.filter((e) => e.category === selectedCategory);
 
   return (
     <div className="page-wrapper">

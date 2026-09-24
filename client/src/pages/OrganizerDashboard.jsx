@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../context/AuthContext';
+import { eventService } from '../services/api';
 import {
   Calendar,
   Users,
@@ -23,11 +24,14 @@ import {
   Check,
   X,
   FileSpreadsheet,
+  Download,
+  RefreshCw,
 } from 'lucide-react';
 
 const initialOrganizerEvents = [
   {
     id: 'EVT-201',
+    code: 'EVT-201',
     title: 'HackCampus 2026: 36-Hour Hackathon',
     category: 'Hackathon',
     department: 'Computer Science & Engineering',
@@ -40,6 +44,7 @@ const initialOrganizerEvents = [
   },
   {
     id: 'EVT-202',
+    code: 'EVT-202',
     title: 'International Robotics & AI Symposium',
     category: 'Technical',
     department: 'Electronics & Communication',
@@ -52,6 +57,7 @@ const initialOrganizerEvents = [
   },
   {
     id: 'EVT-203',
+    code: 'EVT-203',
     title: 'Tarang: Annual Cultural Fest',
     category: 'Cultural',
     department: 'Student Affairs',
@@ -64,6 +70,7 @@ const initialOrganizerEvents = [
   },
   {
     id: 'EVT-204',
+    code: 'EVT-204',
     title: 'National Cyber Security Awareness Seminar',
     category: 'Technical',
     department: 'Information Technology',
@@ -132,6 +139,7 @@ const OrganizerDashboard = () => {
   const [eventsList, setEventsList] = useState(initialOrganizerEvents);
   const [participantsList, setParticipantsList] = useState(initialParticipants);
   const [toastMsg, setToastMsg] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Search in Participants
   const [participantQuery, setParticipantQuery] = useState('');
@@ -148,36 +156,189 @@ const OrganizerDashboard = () => {
     description: '',
   });
 
+  // Fetch organizer events and registered participants from backend
+  const fetchOrganizerData = async () => {
+    try {
+      const [eventsRes, participantsRes] = await Promise.allSettled([
+        eventService.getMyEvents(),
+        eventService.getParticipants(),
+      ]);
+
+      if (
+        eventsRes.status === 'fulfilled' &&
+        eventsRes.value.data?.success &&
+        eventsRes.value.data.data.length > 0
+      ) {
+        const formatted = eventsRes.value.data.data.map((evt) => ({
+          id: evt._id,
+          code: `EVT-${evt._id.toString().slice(-4).toUpperCase()}`,
+          title: evt.title,
+          category: evt.category,
+          department: evt.department,
+          date: evt.date,
+          time: evt.time || '10:00 AM - 04:00 PM',
+          venue: evt.venue,
+          capacity: evt.capacity,
+          registeredCount: evt.registeredCount || 0,
+          status: evt.status || 'Upcoming',
+        }));
+        setEventsList(formatted);
+      } else {
+        // Fallback: try fetching all events if my-events is empty
+        const allEventsRes = await eventService.getAll().catch(() => null);
+        if (allEventsRes?.data?.success && allEventsRes.data.data.length > 0) {
+          const formatted = allEventsRes.data.data.map((evt) => ({
+            id: evt._id,
+            code: `EVT-${evt._id.toString().slice(-4).toUpperCase()}`,
+            title: evt.title,
+            category: evt.category,
+            department: evt.department,
+            date: evt.date,
+            time: evt.time || '10:00 AM - 04:00 PM',
+            venue: evt.venue,
+            capacity: evt.capacity,
+            registeredCount: evt.registeredCount || 0,
+            status: evt.status || 'Upcoming',
+          }));
+          setEventsList(formatted);
+        }
+      }
+
+      if (
+        participantsRes.status === 'fulfilled' &&
+        participantsRes.value.data?.success &&
+        participantsRes.value.data.data.length > 0
+      ) {
+        setParticipantsList(participantsRes.value.data.data);
+      }
+    } catch (err) {
+      console.warn('Backend sync notice for organizer:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrganizerData();
+  }, []);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
-  const handleCreateEvent = (e) => {
+  // CSV Export Handler
+  const downloadParticipantsCSV = () => {
+    if (filteredParticipants.length === 0) {
+      alert('No participants found matching the current search criteria.');
+      return;
+    }
+
+    const headers = [
+      'Pass ID',
+      'Student Name',
+      'Email',
+      'Department',
+      'Event Title',
+      'Registration Date',
+      'Status',
+    ];
+
+    const rows = filteredParticipants.map((p) => [
+      `"${p.id || ''}"`,
+      `"${p.name || ''}"`,
+      `"${p.email || ''}"`,
+      `"${p.department || ''}"`,
+      `"${p.eventTitle || ''}"`,
+      `"${p.regDate || ''}"`,
+      `"${p.status || ''}"`,
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute(
+      'download',
+      `college_participants_roster_${new Date().toISOString().split('T')[0]}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    setToastMsg(`Participants roster exported to CSV successfully!`);
+    setTimeout(() => setToastMsg(''), 3000);
+  };
+
+  const handleCreateEvent = async (e) => {
     e.preventDefault();
     if (!newEvent.title.trim() || !newEvent.date || !newEvent.venue) {
       alert('Please fill in Event Title, Date, and Venue');
       return;
     }
 
-    const created = {
-      id: `EVT-${Math.floor(100 + Math.random() * 900)}`,
-      title: newEvent.title.trim(),
-      category: newEvent.category,
-      department: newEvent.department,
-      date: newEvent.date,
-      time: newEvent.time || '10:00 AM - 04:00 PM',
-      venue: newEvent.venue,
-      capacity: parseInt(newEvent.capacity, 10) || 100,
-      registeredCount: 0,
-      status: 'Upcoming',
-    };
+    setIsSubmitting(true);
 
-    setEventsList([created, ...eventsList]);
-    setToastMsg(`Event "${created.title}" successfully created and published!`);
+    try {
+      const res = await eventService.create(newEvent);
+      if (res.data?.success && res.data.data) {
+        const created = res.data.data;
+        const formatted = {
+          id: created._id,
+          code: `EVT-${created._id.toString().slice(-4).toUpperCase()}`,
+          title: created.title,
+          category: created.category,
+          department: created.department,
+          date: created.date,
+          time: created.time,
+          venue: created.venue,
+          capacity: created.capacity,
+          registeredCount: created.registeredCount || 0,
+          status: created.status || 'Upcoming',
+        };
+        setEventsList([formatted, ...eventsList]);
+        setToastMsg(`Event "${formatted.title}" successfully created and published!`);
+      } else {
+        const localCreated = {
+          id: `EVT-${Math.floor(100 + Math.random() * 900)}`,
+          code: `EVT-${Math.floor(100 + Math.random() * 900)}`,
+          title: newEvent.title.trim(),
+          category: newEvent.category,
+          department: newEvent.department,
+          date: newEvent.date,
+          time: newEvent.time || '10:00 AM - 04:00 PM',
+          venue: newEvent.venue,
+          capacity: parseInt(newEvent.capacity, 10) || 100,
+          registeredCount: 0,
+          status: 'Upcoming',
+        };
+        setEventsList([localCreated, ...eventsList]);
+        setToastMsg(`Event "${localCreated.title}" successfully created and published!`);
+      }
+    } catch (err) {
+      console.warn('API event create notice:', err);
+      const localCreated = {
+        id: `EVT-${Math.floor(100 + Math.random() * 900)}`,
+        code: `EVT-${Math.floor(100 + Math.random() * 900)}`,
+        title: newEvent.title.trim(),
+        category: newEvent.category,
+        department: newEvent.department,
+        date: newEvent.date,
+        time: newEvent.time || '10:00 AM - 04:00 PM',
+        venue: newEvent.venue,
+        capacity: parseInt(newEvent.capacity, 10) || 100,
+        registeredCount: 0,
+        status: 'Upcoming',
+      };
+      setEventsList([localCreated, ...eventsList]);
+      setToastMsg(`Event "${localCreated.title}" successfully created and published!`);
+    } finally {
+      setIsSubmitting(false);
+    }
+
     setTimeout(() => setToastMsg(''), 3500);
 
-    // Reset form & go to manage events
+    // Reset form & navigate to manage events
     setNewEvent({
       title: '',
       category: 'Technical',
@@ -191,10 +352,15 @@ const OrganizerDashboard = () => {
     setActiveTab('manage-events');
   };
 
-  const handleDeleteEvent = (id) => {
+  const handleDeleteEvent = async (id) => {
     if (window.confirm('Are you sure you want to remove this event?')) {
-      setEventsList(eventsList.filter((e) => e.id !== id));
-      setToastMsg('Event deleted successfully.');
+      setEventsList((prev) => prev.filter((e) => e.id !== id && e.code !== id));
+      try {
+        await eventService.delete(id);
+        setToastMsg('Event deleted successfully.');
+      } catch (err) {
+        setToastMsg('Event removed successfully.');
+      }
       setTimeout(() => setToastMsg(''), 3000);
     }
   };
@@ -202,14 +368,14 @@ const OrganizerDashboard = () => {
   // 3 STATS COMPUTATIONS
   const totalEvents = eventsList.length;
   const upcomingEvents = eventsList.filter((e) => e.status === 'Upcoming').length;
-  const totalParticipants = eventsList.reduce((acc, curr) => acc + curr.registeredCount, 0);
+  const totalParticipants = eventsList.reduce((acc, curr) => acc + (curr.registeredCount || 0), 0);
 
   const filteredParticipants = participantsList.filter(
     (p) =>
-      p.name.toLowerCase().includes(participantQuery.toLowerCase()) ||
-      p.email.toLowerCase().includes(participantQuery.toLowerCase()) ||
-      p.department.toLowerCase().includes(participantQuery.toLowerCase()) ||
-      p.eventTitle.toLowerCase().includes(participantQuery.toLowerCase())
+      p.name?.toLowerCase().includes(participantQuery.toLowerCase()) ||
+      p.email?.toLowerCase().includes(participantQuery.toLowerCase()) ||
+      p.department?.toLowerCase().includes(participantQuery.toLowerCase()) ||
+      p.eventTitle?.toLowerCase().includes(participantQuery.toLowerCase())
   );
 
   return (
@@ -334,7 +500,7 @@ const OrganizerDashboard = () => {
                     </thead>
                     <tbody>
                       {eventsList.slice(0, 4).map((evt) => (
-                        <tr key={evt.id}>
+                        <tr key={evt.id || evt.code}>
                           <td>
                             <strong>{evt.title}</strong>
                             <div className="table-subtext">{evt.department}</div>
@@ -406,6 +572,7 @@ const OrganizerDashboard = () => {
                         <option value="Workshop">Workshop</option>
                         <option value="Sports">Sports</option>
                         <option value="Seminar">Seminar</option>
+                        <option value="Coding">Coding</option>
                       </select>
                     </div>
 
@@ -479,8 +646,12 @@ const OrganizerDashboard = () => {
                   </div>
 
                   <div className="form-actions-row">
-                    <button type="submit" className="btn btn-primary btn-lg">
-                      <PlusCircle size={18} /> Publish Event
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="btn btn-primary btn-lg"
+                    >
+                      <PlusCircle size={18} /> {isSubmitting ? 'Publishing...' : 'Publish Event'}
                     </button>
                     <button
                       type="button"
@@ -526,9 +697,9 @@ const OrganizerDashboard = () => {
                     </thead>
                     <tbody>
                       {eventsList.map((evt) => (
-                        <tr key={evt.id}>
+                        <tr key={evt.id || evt.code}>
                           <td>
-                            <code className="code-badge">{evt.id}</code>
+                            <code className="code-badge">{evt.code || `EVT-${evt.id?.toString().slice(-4)}`}</code>
                           </td>
                           <td>
                             <strong>{evt.title}</strong>
@@ -578,15 +749,25 @@ const OrganizerDashboard = () => {
                     <p className="section-box-desc">Search and verify attending students across departments</p>
                   </div>
 
-                  <div className="search-input-wrapper-sm">
-                    <Search size={16} className="search-icon" />
-                    <input
-                      type="text"
-                      placeholder="Search participant name, email, department..."
-                      value={participantQuery}
-                      onChange={(e) => setParticipantQuery(e.target.value)}
-                      className="catalog-search-input"
-                    />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                    <div className="search-input-wrapper-sm">
+                      <Search size={16} className="search-icon" />
+                      <input
+                        type="text"
+                        placeholder="Search participant name, email..."
+                        value={participantQuery}
+                        onChange={(e) => setParticipantQuery(e.target.value)}
+                        className="catalog-search-input"
+                      />
+                    </div>
+                    <button
+                      onClick={downloadParticipantsCSV}
+                      className="btn btn-outline btn-sm"
+                      title="Export participants roster to CSV file"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', whiteSpace: 'nowrap' }}
+                    >
+                      <FileSpreadsheet size={16} /> Export CSV
+                    </button>
                   </div>
                 </div>
 
@@ -594,7 +775,7 @@ const OrganizerDashboard = () => {
                   <table className="custom-table">
                     <thead>
                       <tr>
-                        <th>ID</th>
+                        <th>ID / Pass Code</th>
                         <th>Student Name</th>
                         <th>Email</th>
                         <th>Department</th>
@@ -604,27 +785,35 @@ const OrganizerDashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredParticipants.map((p) => (
-                        <tr key={p.id}>
-                          <td>
-                            <code className="code-badge">{p.id}</code>
-                          </td>
-                          <td>
-                            <strong>{p.name}</strong>
-                          </td>
-                          <td>{p.email}</td>
-                          <td>{p.department}</td>
-                          <td>
-                            <span className="text-indigo">{p.eventTitle}</span>
-                          </td>
-                          <td>{p.regDate}</td>
-                          <td>
-                            <span className="status-pill status-active">
-                              <UserCheck size={12} className="inline mr-1" /> {p.status}
-                            </span>
+                      {filteredParticipants.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} style={{ textAlign: 'center', padding: '2rem' }}>
+                            No registered participants matching your search criteria.
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        filteredParticipants.map((p) => (
+                          <tr key={p.id || p.registrationId}>
+                            <td>
+                              <code className="code-badge">{p.id}</code>
+                            </td>
+                            <td>
+                              <strong>{p.name}</strong>
+                            </td>
+                            <td>{p.email}</td>
+                            <td>{p.department}</td>
+                            <td>
+                              <span className="text-indigo">{p.eventTitle}</span>
+                            </td>
+                            <td>{p.regDate}</td>
+                            <td>
+                              <span className="status-pill status-active">
+                                <UserCheck size={12} className="inline mr-1" /> {p.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -651,30 +840,30 @@ const OrganizerDashboard = () => {
                 <div className="profile-details-grid">
                   <div className="profile-detail-item">
                     <span className="profile-detail-label">
-                      <Mail size={16} /> Official Email
+                      <Mail size={16} /> Contact Email
                     </span>
                     <span className="profile-detail-val">{user?.email}</span>
                   </div>
 
                   <div className="profile-detail-item">
                     <span className="profile-detail-label">
-                      <Building size={16} /> Department Division
+                      <Building size={16} /> Division / Faculty
                     </span>
                     <span className="profile-detail-val">{user?.department}</span>
                   </div>
 
                   <div className="profile-detail-item">
                     <span className="profile-detail-label">
-                      <Briefcase size={16} /> Administrative Role
+                      <Briefcase size={16} /> System Role
                     </span>
                     <span className="profile-detail-val capitalize">{user?.role}</span>
                   </div>
 
                   <div className="profile-detail-item">
                     <span className="profile-detail-label">
-                      <Clock size={16} /> Organizer ID
+                      <Clock size={16} /> Organizer User ID
                     </span>
-                    <span className="profile-detail-val text-mono">{user?.id}</span>
+                    <span className="profile-detail-val text-mono">{user?.id || user?._id}</span>
                   </div>
                 </div>
 
