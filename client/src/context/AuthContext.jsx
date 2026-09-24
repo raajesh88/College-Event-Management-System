@@ -9,29 +9,42 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const verifyUser = async () => {
       const storedToken = authService.getToken();
       if (storedToken) {
         try {
           const res = await authService.getMe();
-          if (res.data && res.data.user) {
+          if (isMounted && res.data && res.data.user) {
             setUser(res.data.user);
             localStorage.setItem('user', JSON.stringify(res.data.user));
           }
         } catch (err) {
-          console.error('Session expired or invalid token:', err);
-          authService.logout();
+          console.warn('Session verification issue:', err?.message || err);
+          // Only clear session if server explicitly returned 401 Unauthorized
+          if (err.response && err.response.status === 401) {
+            authService.logout();
+            if (isMounted) {
+              setUser(null);
+              setToken(null);
+            }
+          }
+        }
+      } else {
+        if (isMounted) {
           setUser(null);
           setToken(null);
         }
-      } else {
-        setUser(null);
-        setToken(null);
       }
-      setLoading(false);
+      if (isMounted) setLoading(false);
     };
 
     verifyUser();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const login = (newToken, newUser) => {

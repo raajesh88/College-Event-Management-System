@@ -1,11 +1,31 @@
 import axios from 'axios';
 
+// Dynamically determine the API Base URL:
+// 1. If VITE_API_URL is explicitly configured, use it.
+// 2. If running locally in a browser on localhost / 127.0.0.1, use http://localhost:5000/api.
+// 3. Otherwise (deployed on Vercel or any cloud domain), connect directly to the live Render backend.
+const getBaseURL = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+
+  if (typeof window !== 'undefined' && window.location) {
+    const { hostname } = window.location;
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1') {
+      return 'http://localhost:5000/api';
+    }
+  }
+
+  return 'https://college-event-management-system-yb3w.onrender.com/api';
+};
+
 // Base API configuration
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 35000, // 35 seconds to comfortably accommodate Render free-tier cold-start
 });
 
 // Request Interceptor: Automatically attach JWT Token to Authorization header
@@ -26,9 +46,9 @@ API.interceptors.request.use(
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    // If token is invalid or expired, clear local storage
+    // If token is invalid or expired, clear local storage and redirect to login
     if (error.response && error.response.status === 401) {
-      const currentPath = window.location.pathname;
+      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
       if (currentPath !== '/login' && currentPath !== '/signup' && currentPath !== '/') {
         localStorage.removeItem('token');
         localStorage.removeItem('user');

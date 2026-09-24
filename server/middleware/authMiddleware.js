@@ -23,7 +23,10 @@ const authMiddleware = async (req, res, next) => {
     }
 
     // 3. Verify JWT using JWT_SECRET
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || 'college_event_mgmt_super_secret_jwt_key_2026'
+    );
 
     // 4. Attach decoded user information to req.user
     // decoded contains: { userId, email, role, iat, exp }

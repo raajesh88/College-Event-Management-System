@@ -139,8 +139,8 @@ const Signup = () => {
       console.error('Registration failed:', err);
       const serverMsg =
         err.response?.data?.message ||
-        (err.code === 'ERR_NETWORK'
-          ? 'Unable to connect to server. Please ensure the backend is running.'
+        (err.code === 'ERR_NETWORK' || !err.response
+          ? 'Unable to reach the server. If using the cloud backend on Render, it may be waking up from sleep. Please wait a moment and try again.'
           : 'Registration failed. Please check your information and try again.');
       setError(serverMsg);
     } finally {

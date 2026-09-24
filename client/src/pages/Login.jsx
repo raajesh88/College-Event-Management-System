@@ -97,8 +97,8 @@ const Login = () => {
       console.error('Login error:', err);
       const serverMsg =
         err.response?.data?.message ||
-        (err.code === 'ERR_NETWORK'
-          ? 'Unable to connect to server. Please ensure the backend is running on port 5000.'
+        (err.code === 'ERR_NETWORK' || !err.response
+          ? 'Unable to reach the server. If using the cloud backend on Render, it may be waking up from sleep. Please wait a moment and try again.'
           : 'Invalid email or password. Please try again.');
       setError(serverMsg);
     } finally {
