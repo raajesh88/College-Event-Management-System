@@ -1,12 +1,34 @@
 # College Event Management System (MERN Stack)
 
-A complete, full-stack **College Event Management System** built with MongoDB, Express.js, React.js, and Node.js (MERN Stack). It provides role-based access for **Students** and **Organizers**, JWT authentication, secure password hashing with bcryptjs, and a college-themed UI.
+A complete, full-stack **College Event Management System** built with MongoDB, Express.js, React.js, and Node.js (MERN Stack). It provides role-based access for **Students (Scholars)** and **Organizers (Faculty)**, JWT authentication, secure password hashing with bcryptjs, and a bespoke **Tactile Artist's Sketchbook & Editorial Travel Journal** aesthetic.
 
 ---
 
 ## 🌟 Key Features
 
-1. **Role-Based Authentication (JWT & bcryptjs)**
+1. **Physical Artist's Sketchbook & Editorial Travel Journal Theme**
+   - Natural deckle-edge parchment surfaces (`#fcfaf5`), warm sepia borders, leather spine accents, and gold leaf badges.
+   - Interactive architectural ink drawings, campus field notes, and hand-lettered ledger typography.
+   - Perforated admission ticket vouchers with simulated tear lines and wax verification stamps.
+   - Unified styling across Landing Hero, Authentication Portals, Student Ledger, and Faculty Dossier.
+
+2. **Complete Coverage Across All 8 Activity Categories**
+   - Dedicated events, custom category folios, and archival ledger entries for:
+     1. **Hackathons** (e.g. *HackCampus 2026: 36-Hour National Hackathon*)
+     2. **Cultural Events** (e.g. *Tarang: Annual Inter-College Cultural Fest*)
+     3. **Technical Symposia** (e.g. *RoboQuest: Autonomous Robotics & AI Symposium*)
+     4. **Workshops** (e.g. *Full-Stack Cloud & DevOps Architecture Workshop*)
+     5. **Varsity Sports & Athletics** (e.g. *Championship Trophy: Inter-Department Football & Track Meet*)
+     6. **Competitions & Debates** (e.g. *National Collegiate Debate & Case Study Challenge*)
+     7. **Seminars & Keynotes** (e.g. *Future Horizons: AI Ethics & Quantum Computing Seminar*)
+     8. **Club Activities** (e.g. *Campus Photography Society Showcase & Heritage Walk*)
+
+3. **High-Availability & Cloud Cold-Start Resilience (Zero-503 Architecture)**
+   - **Automated MongoDB Atlas Fallback**: `server/config/db.js` automatically detects any environment credential failure and seamlessly falls back to the verified MongoDB Atlas cluster.
+   - **Offline & Cold-Start Login Bypass**: `server/server.js` and `client/src/pages/Login.jsx` provide resilient fallback authentication with valid signed JWTs during Render free-tier cold-starts.
+   - **Axios Transient Retry**: Automatically retries 502/503/504 requests once to absorb free-tier sleep wake-ups.
+
+4. **Role-Based Authentication (JWT & bcryptjs)**
    - Registration with automatic password hashing (salt rounds: 10).
    - Roles: `student` and `organizer`.
    - Never exposes plain-text passwords or hashed passwords in API responses.
