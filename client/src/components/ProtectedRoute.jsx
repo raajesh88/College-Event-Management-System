@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import CapybaraLoader from './CapybaraLoader';
 
 const ProtectedRoute = ({ children, allowedRole }) => {
   const { user, token, loading } = useAuth();
@@ -9,8 +10,7 @@ const ProtectedRoute = ({ children, allowedRole }) => {
   if (loading) {
     return (
       <div className="loading-screen">
-        <div className="spinner"></div>
-        <p>Verifying authentication...</p>
+        <CapybaraLoader message="Verifying campus authentication..." />
       </div>
     );
   }

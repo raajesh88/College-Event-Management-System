@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import LogoutModal from './LogoutModal';
 import { Calendar, User, LogOut, Menu, X, Sparkles, PlusCircle, CheckSquare, Layers } from 'lucide-react';
 
 const Navbar = ({ activeTab, onTabChange }) => {
@@ -8,8 +9,14 @@ const Navbar = ({ activeTab, onTabChange }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
+    setShowLogoutModal(false);
     logout();
     setMobileMenuOpen(false);
     navigate('/login');
@@ -20,8 +27,27 @@ const Navbar = ({ activeTab, onTabChange }) => {
   const toggleMobile = () => setMobileMenuOpen(!mobileMenuOpen);
   const closeMobile = () => setMobileMenuOpen(false);
 
+  const handleNavSection = (sectionId, e) => {
+    if (e) e.preventDefault();
+    closeMobile();
+    if (location.pathname === '/') {
+      const el = document.getElementById(sectionId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate(`/#${sectionId}`);
+    }
+  };
+
   return (
     <header className="navbar-header">
+      {/* Cyber-themed Logout Modal */}
+      <LogoutModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={confirmLogout}
+      />
       <div className="nav-container">
         {/* Brand / Logo */}
         <Link to="/" className="brand-logo" onClick={closeMobile}>
@@ -29,8 +55,8 @@ const Navbar = ({ activeTab, onTabChange }) => {
             <Calendar className="brand-icon" />
           </div>
           <div className="brand-text">
-            <span className="brand-title">CampusEvents</span>
-            <span className="brand-subtitle">College Event Hub</span>
+            <span className="brand-title">College Events</span>
+            <span className="brand-subtitle">Campus Event Hub</span>
           </div>
         </Link>
 
@@ -42,10 +68,15 @@ const Navbar = ({ activeTab, onTabChange }) => {
               <Link to="/" className={`nav-link ${location.pathname === '/' ? 'active' : ''}`}>
                 Home
               </Link>
-              <a href="#about" className="nav-link">About</a>
-              <a href="#events" className="nav-link">Events</a>
-              <a href="#features" className="nav-link">Features</a>
-              <a href="#contact" className="nav-link">Contact</a>
+              <a href="#events" onClick={(e) => handleNavSection('events', e)} className="nav-link">
+                Events
+              </a>
+              <a href="#about" onClick={(e) => handleNavSection('about', e)} className="nav-link">
+                About
+              </a>
+              <a href="#contact" onClick={(e) => handleNavSection('contact', e)} className="nav-link">
+                Contact
+              </a>
             </div>
           )}
 
@@ -119,7 +150,7 @@ const Navbar = ({ activeTab, onTabChange }) => {
           <div className="nav-actions">
             {!token ? (
               <>
-                <Link to="/login" className="btn btn-ghost">
+                <Link to="/login" className="btn btn-ghost auth-login-btn" data-auth="login">
                   Login
                 </Link>
                 <Link to="/signup" className="btn btn-primary">
@@ -149,8 +180,9 @@ const Navbar = ({ activeTab, onTabChange }) => {
 
                 <button
                   onClick={handleLogout}
-                  className="btn btn-danger-outline btn-sm nav-logout-btn"
+                  className="btn btn-danger-outline btn-sm nav-logout-btn auth-signout-btn"
                   title="Logout"
+                  data-auth="signout"
                 >
                   <LogOut size={16} /> Logout
                 </button>
@@ -171,10 +203,9 @@ const Navbar = ({ activeTab, onTabChange }) => {
           {(!token || isPublicPage) && (
             <div className="mobile-links">
               <Link to="/" onClick={closeMobile} className="mobile-link">Home</Link>
-              <a href="#about" onClick={closeMobile} className="mobile-link">About</a>
-              <a href="#events" onClick={closeMobile} className="mobile-link">Events</a>
-              <a href="#features" onClick={closeMobile} className="mobile-link">Features</a>
-              <a href="#contact" onClick={closeMobile} className="mobile-link">Contact</a>
+              <a href="#events" onClick={(e) => handleNavSection('events', e)} className="mobile-link">Events</a>
+              <a href="#about" onClick={(e) => handleNavSection('about', e)} className="mobile-link">About</a>
+              <a href="#contact" onClick={(e) => handleNavSection('contact', e)} className="mobile-link">Contact</a>
             </div>
           )}
 
@@ -245,7 +276,7 @@ const Navbar = ({ activeTab, onTabChange }) => {
           <div className="mobile-actions">
             {!token ? (
               <div className="mobile-auth-btns">
-                <Link to="/login" onClick={closeMobile} className="btn btn-ghost btn-block">
+                <Link to="/login" onClick={closeMobile} className="btn btn-ghost btn-block auth-login-btn" data-auth="login">
                   Login
                 </Link>
                 <Link to="/signup" onClick={closeMobile} className="btn btn-primary btn-block">
@@ -258,7 +289,7 @@ const Navbar = ({ activeTab, onTabChange }) => {
                   <strong>{user?.name}</strong>
                   <span className="badge-role">{user?.role}</span>
                 </div>
-                <button onClick={handleLogout} className="btn btn-danger-outline btn-block">
+                <button onClick={handleLogout} className="btn btn-danger-outline btn-block auth-signout-btn" data-auth="signout">
                   <LogOut size={16} /> Logout
                 </button>
               </div>

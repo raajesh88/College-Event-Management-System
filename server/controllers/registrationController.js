@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Registration = require('../models/Registration');
 const Event = require('../models/Event');
 const User = require('../models/User');
@@ -13,6 +14,13 @@ const registerForEvent = async (req, res) => {
     }
 
     const { eventId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid event identifier. Please select an active event.',
+      });
+    }
 
     const event = await Event.findById(eventId);
     if (!event) {
@@ -118,6 +126,13 @@ const cancelRegistration = async (req, res) => {
     }
 
     const { eventId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid event identifier.',
+      });
+    }
 
     const registration = await Registration.findOne({
       event: eventId,

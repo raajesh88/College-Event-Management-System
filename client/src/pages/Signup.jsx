@@ -2,19 +2,15 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import CapybaraLoader from '../components/CapybaraLoader';
 import { authService } from '../services/api';
 import {
-  User,
-  Mail,
-  Lock,
-  Building,
   GraduationCap,
   Briefcase,
   Eye,
   EyeOff,
   AlertCircle,
   CheckCircle,
-  Loader2,
   ArrowRight,
 } from 'lucide-react';
 
@@ -40,7 +36,7 @@ const Signup = () => {
     password: '',
     confirmPassword: '',
     department: '',
-    role: 'student', // default to student
+    role: 'student', // default role
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -74,7 +70,7 @@ const Signup = () => {
 
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/;
     if (!emailRegex.test(email.trim())) {
-      setError('Please enter a valid email address (e.g. name@campus.edu)');
+      setError('Please enter a valid email address (e.g. alex@college.edu)');
       return false;
     }
 
@@ -140,7 +136,7 @@ const Signup = () => {
       const serverMsg =
         err.response?.data?.message ||
         (err.code === 'ERR_NETWORK' || !err.response
-          ? 'Unable to reach the server. If using the cloud backend on Render, it may be waking up from sleep. Please wait a moment and try again.'
+          ? 'Unable to reach the server. If using the cloud backend, it may be waking up. Please retry in a few seconds.'
           : 'Registration failed. Please check your information and try again.');
       setError(serverMsg);
     } finally {
@@ -152,220 +148,209 @@ const Signup = () => {
     <div className="page-wrapper">
       <Navbar />
 
-      <main className="auth-page-container">
-        <div className="auth-card-wrapper">
-          <div className="auth-card">
-            {/* Header */}
-            <div className="auth-header">
-              <span className="auth-badge">Join CampusEvents</span>
-              <h2 className="auth-title">Create Account</h2>
-              <p className="auth-subtitle">
-                Register to explore events or manage campus activities
-              </p>
+      <main className="auth-hero-backdrop-page">
+        <div className="form-container" style={{ maxWidth: '580px' }}>
+          <form onSubmit={handleSubmit} className="form" noValidate>
+            <div className="text-center mb-2">
+              <span className="inst-badge" style={{ fontSize: '0.72rem', letterSpacing: '0.08em' }}>
+                COLLEGIATE MATRICULATION REGISTRY • EST. 1926
+              </span>
             </div>
+
+            <h1 className="c1" style={{ fontSize: '2.15rem', marginBottom: '0.25rem', textAlign: 'center' }}>
+              Scholar Enrollment Charter
+            </h1>
+            <p className="c2" style={{ marginBottom: '1.25rem', fontSize: '0.98rem', textAlign: 'center' }}>
+              Register your academic portfolio to participate in hackathons, cultural fests, and varsity sports
+            </p>
 
             {/* Error Banner */}
             {error && (
-              <div className="alert-box alert-error" role="alert">
-                <AlertCircle size={18} className="alert-icon" />
+              <div className="cyber-alert-error" role="alert" style={{ textAlign: 'left', marginBottom: '1rem', padding: '0.65rem 0.85rem' }}>
+                <AlertCircle size={18} />
                 <span>{error}</span>
               </div>
             )}
 
             {/* Success Banner */}
             {successMsg && (
-              <div className="alert-box alert-success" role="alert">
-                <CheckCircle size={18} className="alert-icon" />
+              <div className="cyber-alert-success" role="status" style={{ textAlign: 'left', marginBottom: '1rem', padding: '0.65rem 0.85rem' }}>
+                <CheckCircle size={18} />
                 <span>{successMsg}</span>
               </div>
             )}
 
-            {/* Registration Form */}
-            <form onSubmit={handleSubmit} className="auth-form" noValidate>
-              {/* Role Selection */}
-              <div className="form-group">
-                <label className="form-label">Select Your Role</label>
-                <div className="role-selector-grid">
-                  <button
-                    type="button"
-                    className={`role-btn ${formData.role === 'student' ? 'active' : ''}`}
-                    onClick={() => handleRoleSelect('student')}
-                  >
-                    <div className="role-icon-box">
-                      <GraduationCap size={20} />
-                    </div>
-                    <div className="role-text">
-                      <strong>Student</strong>
-                      <span>Browse & Register</span>
-                    </div>
-                  </button>
+            {/* Role Selection */}
+            <label className="cyber-label">Select Academic Role</label>
+            <div className="cyber-role-selector">
+              <button
+                type="button"
+                className={`cyber-role-btn ${formData.role === 'student' ? 'active' : ''}`}
+                onClick={() => handleRoleSelect('student')}
+              >
+                <GraduationCap size={18} />
+                <span>Enrolled Scholar</span>
+              </button>
+              <button
+                type="button"
+                className={`cyber-role-btn ${formData.role === 'organizer' ? 'active' : ''}`}
+                onClick={() => handleRoleSelect('organizer')}
+              >
+                <Briefcase size={18} />
+                <span>Faculty Registrar</span>
+              </button>
+            </div>
 
-                  <button
-                    type="button"
-                    className={`role-btn ${formData.role === 'organizer' ? 'active' : ''}`}
-                    onClick={() => handleRoleSelect('organizer')}
-                  >
-                    <div className="role-icon-box">
-                      <Briefcase size={20} />
-                    </div>
-                    <div className="role-text">
-                      <strong>Organizer</strong>
-                      <span>Host & Manage Events</span>
-                    </div>
-                  </button>
-                </div>
-              </div>
-
-              {/* Full Name */}
-              <div className="form-group">
-                <label htmlFor="name" className="form-label">
+            {/* Full Name & Email Grid */}
+            <div className="cyber-grid-2">
+              <div>
+                <label className="cyber-label" htmlFor="signup-name">
                   Full Name
                 </label>
-                <div className="input-with-icon">
-                  <User size={18} className="input-icon" />
-                  <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    placeholder="e.g. Alex Rivera"
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="form-input"
-                    required
-                  />
-                </div>
+                <input
+                  id="signup-name"
+                  name="name"
+                  type="text"
+                  placeholder="e.g. Alex Rivera"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="input"
+                  required
+                />
               </div>
 
-              {/* Email */}
-              <div className="form-group">
-                <label htmlFor="email" className="form-label">
-                  College / Personal Email
+              <div>
+                <label className="cyber-label" htmlFor="signup-email">
+                  Institutional / Personal Email
                 </label>
-                <div className="input-with-icon">
-                  <Mail size={18} className="input-icon" />
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="e.g. alex.rivera@college.edu"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="form-input"
-                    required
-                  />
-                </div>
+                <input
+                  id="signup-email"
+                  name="email"
+                  type="email"
+                  placeholder="e.g. alex@college.edu"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="input"
+                  required
+                />
               </div>
+            </div>
 
-              {/* Department */}
-              <div className="form-group">
-                <label htmlFor="department" className="form-label">
-                  Department
-                </label>
-                <div className="input-with-icon">
-                  <Building size={18} className="input-icon" />
-                  <select
-                    id="department"
-                    name="department"
-                    value={formData.department}
-                    onChange={handleChange}
-                    className="form-input form-select"
-                    required
-                  >
-                    <option value="">-- Choose your department --</option>
-                    {departmentsList.map((dept) => (
-                      <option key={dept} value={dept}>
-                        {dept}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+            {/* Department */}
+            <label className="cyber-label" htmlFor="signup-dept">
+              Academic Department
+            </label>
+            <select
+              id="signup-dept"
+              name="department"
+              value={formData.department}
+              onChange={handleChange}
+              className="input clean-select"
+              required
+            >
+              <option value="">-- Choose academic department --</option>
+              {departmentsList.map((dept) => (
+                <option key={dept} value={dept}>
+                  {dept}
+                </option>
+              ))}
+            </select>
 
-              {/* Password */}
-              <div className="form-group">
-                <label htmlFor="password" className="form-label">
-                  Password (min 6 characters)
+            {/* Password & Confirm Password Grid */}
+            <div className="cyber-grid-2">
+              <div>
+                <label className="cyber-label" htmlFor="signup-password">
+                  Passkey (min 6 chars)
                 </label>
-                <div className="input-with-icon">
-                  <Lock size={18} className="input-icon" />
+                <div style={{ position: 'relative' }}>
                   <input
-                    id="password"
+                    id="signup-password"
                     name="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Create a strong password"
+                    placeholder="Create passkey"
                     value={formData.password}
                     onChange={handleChange}
-                    className="form-input pr-10"
+                    className="input"
+                    style={{ paddingRight: '40px' }}
                     required
                   />
                   <button
                     type="button"
-                    className="password-toggle-btn"
+                    style={{
+                      position: 'absolute',
+                      right: '12px',
+                      top: '12px',
+                      background: 'none',
+                      border: 'none',
+                      color: '#8b2500',
+                      cursor: 'pointer',
+                    }}
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
 
-              {/* Confirm Password */}
-              <div className="form-group">
-                <label htmlFor="confirmPassword" className="form-label">
-                  Confirm Password
+              <div>
+                <label className="cyber-label" htmlFor="signup-confirm">
+                  Confirm Passkey
                 </label>
-                <div className="input-with-icon">
-                  <Lock size={18} className="input-icon" />
+                <div style={{ position: 'relative' }}>
                   <input
-                    id="confirmPassword"
+                    id="signup-confirm"
                     name="confirmPassword"
                     type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder="Confirm your password"
+                    placeholder="Repeat passkey"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className="form-input pr-10"
+                    className="input"
+                    style={{ paddingRight: '40px' }}
                     required
                   />
                   <button
                     type="button"
-                    className="password-toggle-btn"
+                    style={{
+                      position: 'absolute',
+                      right: '12px',
+                      top: '12px',
+                      background: 'none',
+                      border: 'none',
+                      color: '#8b2500',
+                      cursor: 'pointer',
+                    }}
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
                   >
-                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="btn btn-primary btn-block btn-lg auth-submit-btn"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin mr-2" />
-                    Creating Account...
-                  </>
-                ) : (
-                  <>
-                    Create Account <ArrowRight size={18} />
-                  </>
-                )}
-              </button>
-            </form>
-
-            {/* Footer switch to login */}
-            <div className="auth-footer-nav">
-              <p>
-                Already have an account?{' '}
-                <Link to="/login" className="auth-link">
-                  Login
-                </Link>
-              </p>
             </div>
-          </div>
+
+            {/* Loader or Submit Buttons */}
+            {loading ? (
+              <div style={{ padding: '0.75rem 0' }}>
+                <CapybaraLoader message="Registering your matriculation charter..." />
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: '1rem', marginTop: '1.25rem' }}>
+                <button type="submit" disabled={loading} className="btn btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+                  <span>Seal Matriculation Charter</span> <ArrowRight size={16} />
+                </button>
+                <Link to="/login" className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  Sign In
+                </Link>
+              </div>
+            )}
+
+            {/* Footer Navigation */}
+            <div style={{ textAlign: 'center', marginTop: '1.25rem', color: '#6d5b4d', fontSize: '0.9rem' }}>
+              <span>Already hold an academic registry key? </span>
+              <Link to="/login" className="btn-link" data-auth="signin">Access Portal Here</Link>
+            </div>
+          </form>
         </div>
       </main>
 

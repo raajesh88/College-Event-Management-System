@@ -97,10 +97,20 @@ const QRCodeSVG = ({ text, size = 180 }) => {
   );
 };
 
-const QRCodePassModal = ({ pass, onClose }) => {
-  if (!pass) return null;
+const QRCodePassModal = ({ pass, registration, onClose }) => {
+  const item = pass || registration;
+  if (!item) return null;
 
-  const qrData = `COLLEGE-PASS:${pass.passCode || pass.id}:${pass.title}:${pass.studentName || 'Student'}`;
+  const title = item.title || item.eventTitle || item.event?.title || 'Campus Event';
+  const category = item.category || item.event?.category || 'Event';
+  const passCode = item.passCode || (typeof item.id === 'string' && item.id.startsWith('PASS-') ? item.id : `PASS-${item.id || item._id?.toString().slice(-4).toUpperCase() || '8842'}`);
+  const studentName = item.studentName || item.student?.name || item.name || 'Registered Student';
+  const department = item.department || item.studentDepartment || item.student?.department || item.event?.department || 'Academic Department';
+  const date = item.date || item.event?.date || 'Campus Schedule';
+  const time = item.time || item.event?.time || '10:00 AM - 04:00 PM';
+  const venue = item.venue || item.event?.venue || 'Campus Venue';
+
+  const qrData = `COLLEGE-PASS:${passCode}:${title}:${studentName}`;
 
   const handlePrint = () => {
     window.print();
@@ -120,8 +130,8 @@ const QRCodePassModal = ({ pass, onClose }) => {
           <div className="pass-status-pill">
             <ShieldCheck size={14} /> Official Campus Event Pass
           </div>
-          <h2 className="pass-modal-title">{pass.title}</h2>
-          <span className="pass-category-tag">{pass.category || 'Event'}</span>
+          <h2 className="pass-modal-title">{title}</h2>
+          <span className="pass-category-tag">{category}</span>
         </div>
 
         <div className="pass-modal-body">
@@ -130,7 +140,7 @@ const QRCodePassModal = ({ pass, onClose }) => {
             <QRCodeSVG text={qrData} size={190} />
             <div className="pass-code-banner">
               <span className="pass-code-label">Pass Identification Code</span>
-              <strong className="pass-code-digits">{pass.passCode || `PASS-${pass.id}`}</strong>
+              <strong className="pass-code-digits">{passCode}</strong>
             </div>
             <div className="pass-verification-badge">
               <CheckCircle size={15} className="text-emerald" />
@@ -143,13 +153,13 @@ const QRCodePassModal = ({ pass, onClose }) => {
             <div className="pass-detail-group">
               <span className="pass-detail-label">Attendee Name</span>
               <span className="pass-detail-value font-semibold">
-                {pass.studentName || 'Registered Student'}
+                {studentName}
               </span>
             </div>
 
             <div className="pass-detail-group">
               <span className="pass-detail-label">Academic Department</span>
-              <span className="pass-detail-value">{pass.department}</span>
+              <span className="pass-detail-value">{department}</span>
             </div>
 
             <div className="pass-meta-grid">
@@ -157,7 +167,7 @@ const QRCodePassModal = ({ pass, onClose }) => {
                 <Calendar size={16} className="text-indigo" />
                 <div>
                   <small>Event Date</small>
-                  <p>{pass.date}</p>
+                  <p>{date}</p>
                 </div>
               </div>
 
@@ -165,7 +175,7 @@ const QRCodePassModal = ({ pass, onClose }) => {
                 <Clock size={16} className="text-amber" />
                 <div>
                   <small>Schedule</small>
-                  <p>{pass.time || '10:00 AM - 04:00 PM'}</p>
+                  <p>{time}</p>
                 </div>
               </div>
 
@@ -173,7 +183,7 @@ const QRCodePassModal = ({ pass, onClose }) => {
                 <MapPin size={16} className="text-rose" />
                 <div>
                   <small>Campus Venue</small>
-                  <p>{pass.venue}</p>
+                  <p>{venue}</p>
                 </div>
               </div>
             </div>

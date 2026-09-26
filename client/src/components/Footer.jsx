@@ -13,8 +13,8 @@ const Footer = () => {
               <Calendar className="brand-icon" />
             </div>
             <div className="brand-text">
-              <span className="brand-title">CampusEvents</span>
-              <span className="brand-subtitle">College Event Hub</span>
+              <span className="brand-title">College Events</span>
+              <span className="brand-subtitle">Campus Event Hub</span>
             </div>
           </div>
           <p className="footer-desc">
@@ -64,7 +64,7 @@ const Footer = () => {
         </div>
 
         {/* Contact Info */}
-        <div className="footer-col" id="contact">
+        <div className="footer-col footer-contact-col">
           <h4 className="footer-heading">Contact Us</h4>
           <ul className="footer-contact-list">
             <li>

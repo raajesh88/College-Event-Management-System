@@ -1,12 +1,35 @@
 import axios from 'axios';
 
+// Helper to check if a URL string is just an unreplaced placeholder
+const isPlaceholderUrl = (str) => {
+  if (!str || typeof str !== 'string') return true;
+  const s = str.trim().toLowerCase();
+  return (
+    s === '' ||
+    s.includes('your-backend-url') ||
+    s.includes('your-backend-host') ||
+    s.includes('<your-backend-host>') ||
+    s.includes('your-domain') ||
+    s.includes('example.com')
+  );
+};
+
 // Dynamically determine the API Base URL:
-// 1. If VITE_API_URL is explicitly configured, use it.
+// 1. If VITE_API_URL is configured with a valid non-placeholder value, use it.
 // 2. If running locally in a browser on localhost / 127.0.0.1, use http://localhost:5000/api.
-// 3. Otherwise (deployed on Vercel or any cloud domain), connect directly to the live Render backend.
+// 3. Otherwise (deployed on Vercel or cloud domain), connect directly to the live Render backend.
 const getBaseURL = () => {
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+  let url = import.meta.env.VITE_API_URL;
+
+  if (url && typeof url === 'string' && !isPlaceholderUrl(url)) {
+    url = url.trim().replace(/\/+$/, '');
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      url = `https://${url}`;
+    }
+    if (!url.endsWith('/api')) {
+      url = `${url}/api`;
+    }
+    return url;
   }
 
   if (typeof window !== 'undefined' && window.location) {
@@ -16,7 +39,7 @@ const getBaseURL = () => {
     }
   }
 
-  return 'https://college-event-management-system-yb3w.onrender.com/api';
+  return 'https://college-event-management-system-3-5atj.onrender.com/api';
 };
 
 // Base API configuration
@@ -25,14 +48,14 @@ const API = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 35000, // 35 seconds to comfortably accommodate Render free-tier cold-start
+  timeout: 35000, // 35 seconds to accommodate Render free-tier cold start
 });
 
 // Request Interceptor: Automatically attach JWT Token to Authorization header
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    if (token) {
+    if (token && token !== 'undefined' && token !== 'null') {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -76,8 +99,17 @@ export const authService = {
       return null;
     }
   },
-  getToken: () => localStorage.getItem('token'),
-  isAuthenticated: () => !!localStorage.getItem('token'),
+  getToken: () => {
+    const token = localStorage.getItem('token');
+    if (!token || token === 'undefined' || token === 'null') {
+      return null;
+    }
+    return token;
+  },
+  isAuthenticated: () => {
+    const token = localStorage.getItem('token');
+    return !!(token && token !== 'undefined' && token !== 'null');
+  },
 };
 
 // Event Service Endpoints
@@ -86,6 +118,7 @@ export const eventService = {
   getById: (id) => API.get(`/events/${id}`),
   getMyEvents: () => API.get('/events/organizer/my-events'),
   getParticipants: (params) => API.get('/events/organizer/participants', { params }),
+  checkInParticipant: (id) => API.patch(`/events/organizer/participants/${id}/checkin`),
   create: (data) => API.post('/events', data),
   update: (id, data) => API.put(`/events/${id}`, data),
   delete: (id) => API.delete(`/events/${id}`),
@@ -99,4 +132,5 @@ export const registrationService = {
 };
 
 export default API;
+
 

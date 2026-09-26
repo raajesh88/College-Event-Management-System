@@ -6,7 +6,12 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => authService.getCurrentUser());
   const [token, setToken] = useState(() => authService.getToken());
-  const [loading, setLoading] = useState(true);
+  // If stored session already exists, do not block UI during cloud cold-start
+  const [loading, setLoading] = useState(() => {
+    const storedToken = authService.getToken();
+    const storedUser = authService.getCurrentUser();
+    return !!(storedToken && !storedUser);
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -21,7 +26,7 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('user', JSON.stringify(res.data.user));
           }
         } catch (err) {
-          console.warn('Session verification issue:', err?.message || err);
+          console.warn('Session verification notice:', err?.message || err);
           // Only clear session if server explicitly returned 401 Unauthorized
           if (err.response && err.response.status === 401) {
             authService.logout();
@@ -48,8 +53,8 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (newToken, newUser) => {
-    localStorage.setItem('token', newToken);
-    localStorage.setItem('user', JSON.stringify(newUser));
+    if (newToken) localStorage.setItem('token', newToken);
+    if (newUser) localStorage.setItem('user', JSON.stringify(newUser));
     setToken(newToken);
     setUser(newUser);
   };
@@ -59,6 +64,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
   };
+
 
   return (
     <AuthContext.Provider value={{ user, token, loading, login, logout, isAuthenticated: !!token }}>

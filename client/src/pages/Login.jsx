@@ -2,16 +2,14 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import CapybaraLoader from '../components/CapybaraLoader';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/api';
 import {
-  Mail,
-  Lock,
   Eye,
   EyeOff,
   AlertCircle,
   CheckCircle,
-  Loader2,
   ArrowRight,
   ShieldCheck,
   UserCheck,
@@ -38,6 +36,8 @@ const Login = () => {
     isExpired ? 'Your session has expired. Please sign in again.' : ''
   );
   const [infoMsg, setInfoMsg] = useState(initialMsg);
+
+  const [rememberMe, setRememberMe] = useState(true);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -98,8 +98,8 @@ const Login = () => {
       const serverMsg =
         err.response?.data?.message ||
         (err.code === 'ERR_NETWORK' || !err.response
-          ? 'Unable to reach the server. If using the cloud backend on Render, it may be waking up from sleep. Please wait a moment and try again.'
-          : 'Invalid email or password. Please try again.');
+          ? 'Unable to connect to server. If the server is on free-tier cloud hosting, please wait 30 seconds for cold-start and try again.'
+          : 'Invalid email or password. Please check your credentials.');
       setError(serverMsg);
     } finally {
       setLoading(false);
@@ -110,138 +110,164 @@ const Login = () => {
     <div className="page-wrapper">
       <Navbar />
 
-      <main className="auth-page-container">
-        <div className="auth-card-wrapper">
-          <div className="auth-card">
-            {/* Header */}
-            <div className="auth-header">
-              <span className="auth-badge">Campus Portal</span>
-              <h2 className="auth-title">Welcome Back</h2>
-              <p className="auth-subtitle">
-                Sign in with your registered college credentials
-              </p>
-            </div>
+      <main className="auth-hero-backdrop-page">
+        <div className="uiverse-form-card">
+          <div className="text-center mb-3">
+            <span className="inst-badge" style={{ fontSize: '0.72rem', letterSpacing: '0.08em' }}>
+              COLLEGIATE ARCHIVAL REGISTRY • EST. 1926
+            </span>
+          </div>
 
+          <h1 className="title" style={{ fontSize: '2.15rem', marginBottom: '0.25rem' }}>
+            Portal Authentication
+          </h1>
+          <p className="subtitle" style={{ marginBottom: '1.5rem', fontSize: '1rem' }}>
+            Enter your academic passkey to access your events dossier
+          </p>
+
+          <form onSubmit={handleSubmit} noValidate>
             {/* Information Notice */}
             {infoMsg && (
-              <div className="alert-box alert-success" role="status">
-                <CheckCircle size={18} className="alert-icon" />
+              <div className="cyber-alert-success" role="status" style={{ textAlign: 'left', marginBottom: '1rem', padding: '0.65rem 0.85rem' }}>
+                <CheckCircle size={18} />
                 <span>{infoMsg}</span>
               </div>
             )}
 
             {/* Error Banner */}
             {error && (
-              <div className="alert-box alert-error" role="alert">
-                <AlertCircle size={18} className="alert-icon" />
+              <div className="cyber-alert-error" role="alert" style={{ textAlign: 'left', marginBottom: '1rem', padding: '0.65rem 0.85rem' }}>
+                <AlertCircle size={18} />
                 <span>{error}</span>
               </div>
             )}
 
-            {/* Login Form */}
-            <form onSubmit={handleSubmit} className="auth-form" noValidate>
-              {/* Email */}
-              <div className="form-group">
-                <label htmlFor="login-email" className="form-label">
-                  Email Address
-                </label>
-                <div className="input-with-icon">
-                  <Mail size={18} className="input-icon" />
-                  <input
-                    id="login-email"
-                    name="email"
-                    type="email"
-                    placeholder="e.g. your.name@college.edu"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="form-input"
-                    required
-                  />
-                </div>
-              </div>
+            {/* Email Field with Academic SVG */}
+            <div className="field">
+              <svg className="input-icon" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M207.8 20.73c-93.45 18.32-168.7 93.66-187 187.1c-27.64 140.9 68.65 266.2 199.1 285.1c19.01 2.888 36.17-12.26 36.17-31.49l.0001-.6631c0-15.74-11.44-28.88-26.84-31.24c-84.35-12.98-149.2-86.13-149.2-174.2c0-102.9 88.61-185.5 193.4-175.4c91.54 8.869 158.6 91.25 158.6 183.2l0 16.16c0 22.09-17.94 40.05-40 40.05s-40.01-17.96-40.01-40.05v-120.1c0-8.847-7.161-16.02-16.01-16.02l-31.98 .0036c-7.299 0-13.2 4.992-15.12 11.68c-24.85-12.15-54.24-16.38-86.06-5.106c-38.75 13.73-68.12 48.91-73.72 89.64c-9.483 69.01 43.81 128 110.9 128c26.44 0 50.43-9.544 69.59-24.88c24 31.3 65.23 48.69 109.4 37.49C465.2 369.3 496 324.1 495.1 277.2V256.3C495.1 107.1 361.2-9.332 207.8 20.73zM239.1 304.3c-26.47 0-48-21.56-48-48.05s21.53-48.05 48-48.05s48 21.56 48 48.05S266.5 304.3 239.1 304.3z"></path>
+              </svg>
+              <input
+                autoComplete="off"
+                id="logemail"
+                placeholder="Institutional / Personal Email"
+                className="input-field"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-              {/* Password */}
-              <div className="form-group">
-                <div className="label-row">
-                  <label htmlFor="login-password" className="form-label">
-                    Password
-                  </label>
-                </div>
-                <div className="input-with-icon">
-                  <Lock size={18} className="input-icon" />
-                  <input
-                    id="login-password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Enter your password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="form-input pr-10"
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle-btn"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Submit Button */}
+            {/* Password Field */}
+            <div className="field">
+              <svg className="input-icon" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M80 192V144C80 64.47 144.5 0 224 0C303.5 0 368 64.47 368 144V192H384C419.3 192 448 220.7 448 256V448C448 483.3 419.3 512 384 512H64C28.65 512 0 483.3 0 448V256C0 220.7 28.65 192 64 192H80zM144 192H304V144C304 99.82 268.2 64 224 64C179.8 64 144 99.82 144 144V192z"></path>
+              </svg>
+              <input
+                autoComplete="off"
+                id="logpass"
+                placeholder="Account Passkey"
+                className="input-field"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                value={formData.password}
+                onChange={handleChange}
+                required
+              />
               <button
-                type="submit"
-                disabled={loading}
-                className="btn btn-primary btn-block btn-lg auth-submit-btn"
+                type="button"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#8b2500',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
-                {loading ? (
-                  <>
-                    <Loader2 size={18} className="animate-spin mr-2" />
-                    Signing In...
-                  </>
-                ) : (
-                  <>
-                    Sign In <ArrowRight size={18} />
-                  </>
-                )}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
-            </form>
+            </div>
+
+            {/* Checkbox & Sign Up link */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginTop: '1rem',
+                flexWrap: 'wrap',
+                gap: '8px',
+              }}
+            >
+              <label style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.88rem', color: '#5c4c3e' }}>
+                <input
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  type="checkbox"
+                  style={{ accentColor: '#8b2500' }}
+                />
+                <span>Remember session</span>
+              </label>
+
+              <Link to="/signup" className="btn-link" style={{ margin: 0, fontSize: '0.88rem' }}>
+                Create Scholar Account →
+              </Link>
+            </div>
+
+            {/* Submit Button */}
+            {loading ? (
+              <div style={{ padding: '0.75rem 0' }}>
+                <CapybaraLoader message="Verifying credentials & signing in..." />
+              </div>
+            ) : (
+              <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '1.25rem' }}>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn btn-primary auth-signin-btn"
+                  data-auth="signin"
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                >
+                  <ShieldCheck size={18} />
+                  <span>Enter University Portal</span>
+                </button>
+              </div>
+            )}
 
             {/* Quick Demo Helper */}
-            <div className="demo-credentials-box">
-              <span className="demo-title">
-                <ShieldCheck size={14} /> Quick Demo Accounts:
+            <div className="cyber-demo-bar" style={{ justifyContent: 'center', marginTop: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span className="cyber-demo-title" style={{ fontSize: '0.78rem' }}>
+                Passkey Auto-fill:
               </span>
-              <div className="demo-btns">
-                <button
-                  type="button"
-                  onClick={() => handleQuickFill('student')}
-                  className="btn btn-sm btn-ghost demo-btn"
-                >
-                  <UserCheck size={14} /> Student Demo
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleQuickFill('organizer')}
-                  className="btn btn-sm btn-ghost demo-btn"
-                >
-                  <UserCheck size={14} /> Organizer Demo
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => handleQuickFill('student')}
+                className="cyber-demo-btn"
+              >
+                <UserCheck size={13} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '3px' }} />
+                Scholar Key
+              </button>
+              <button
+                type="button"
+                onClick={() => handleQuickFill('organizer')}
+                className="cyber-demo-btn"
+              >
+                <UserCheck size={13} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '3px' }} />
+                Faculty Key
+              </button>
             </div>
 
-            {/* Footer link to Signup */}
-            <div className="auth-footer-nav">
-              <p>
-                Don't have an account?{' '}
-                <Link to="/signup" className="auth-link">
-                  Create Account
-                </Link>
-              </p>
+            <div className="text-center mt-3">
+              <a href="#forgot" onClick={(e) => { e.preventDefault(); setError('Contact campus registrar desk to reset your institutional credentials.'); }} className="btn-link" style={{ fontSize: '0.84rem' }}>
+                Forgot your credentials?
+              </a>
             </div>
-          </div>
+          </form>
         </div>
       </main>
 
