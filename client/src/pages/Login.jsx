@@ -162,15 +162,15 @@ const Login = () => {
         <div className="uiverse-form-card">
           <div className="text-center mb-3">
             <span className="inst-badge" style={{ fontSize: '0.72rem', letterSpacing: '0.08em' }}>
-              COLLEGIATE ARCHIVAL REGISTRY • EST. 1926
+              COLLEGE EVENT MANAGEMENT SYSTEM
             </span>
           </div>
 
           <h1 className="title" style={{ fontSize: '2.15rem', marginBottom: '0.25rem' }}>
-            Portal Authentication
+            Sign In
           </h1>
           <p className="subtitle" style={{ marginBottom: '1.5rem', fontSize: '1rem' }}>
-            Enter your academic passkey to access your events dossier
+            Welcome back! Enter your email and password to access your events and dashboard.
           </p>
 
           <form onSubmit={handleSubmit} noValidate>
@@ -196,7 +196,7 @@ const Login = () => {
                         className="cyber-demo-btn"
                         style={{ background: '#8b2500', color: '#fff', borderColor: '#8b2500', padding: '5px 10px', fontSize: '0.78rem' }}
                       >
-                        ⚡ Enter as Scholar (Alex Rivera)
+                        ⚡ Student Demo (Alex Rivera)
                       </button>
                       <button
                         type="button"
@@ -204,7 +204,7 @@ const Login = () => {
                         className="cyber-demo-btn"
                         style={{ background: '#2c3e50', color: '#fff', borderColor: '#2c3e50', padding: '5px 10px', fontSize: '0.78rem' }}
                       >
-                        ⚡ Enter as Faculty (Prof. David Vance)
+                        ⚡ Faculty Demo (Prof. David Vance)
                       </button>
                     </div>
                   </div>
@@ -220,7 +220,7 @@ const Login = () => {
               <input
                 autoComplete="off"
                 id="logemail"
-                placeholder="Institutional / Personal Email"
+                placeholder="College / Personal Email"
                 className="input-field"
                 name="email"
                 type="email"
@@ -238,7 +238,7 @@ const Login = () => {
               <input
                 autoComplete="off"
                 id="logpass"
-                placeholder="Account Passkey"
+                placeholder="Password"
                 className="input-field"
                 name="password"
                 type={showPassword ? 'text' : 'password'}
@@ -281,18 +281,18 @@ const Login = () => {
                   type="checkbox"
                   style={{ accentColor: '#8b2500' }}
                 />
-                <span>Remember session</span>
+                <span>Remember me</span>
               </label>
 
               <Link to="/signup" className="btn-link" style={{ margin: 0, fontSize: '0.88rem' }}>
-                Create Scholar Account →
+                Don't have an account? Sign Up →
               </Link>
             </div>
 
             {/* Submit Button */}
             {loading ? (
               <div style={{ padding: '0.75rem 0' }}>
-                <CapybaraLoader message="Verifying credentials & signing in..." />
+                <CapybaraLoader message="Signing you in..." />
               </div>
             ) : (
               <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '1.25rem' }}>
@@ -304,7 +304,7 @@ const Login = () => {
                   style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                 >
                   <ShieldCheck size={18} />
-                  <span>Enter University Portal</span>
+                  <span>Sign In</span>
                 </button>
               </div>
             )}
@@ -312,7 +312,7 @@ const Login = () => {
             {/* Quick Demo Helper */}
             <div className="cyber-demo-bar" style={{ justifyContent: 'center', marginTop: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span className="cyber-demo-title" style={{ fontSize: '0.78rem' }}>
-                Passkey Auto-fill:
+                Quick Demo Login:
               </span>
               <button
                 type="button"
@@ -320,7 +320,7 @@ const Login = () => {
                 className="cyber-demo-btn"
               >
                 <UserCheck size={13} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '3px' }} />
-                Scholar Key
+                Student
               </button>
               <button
                 type="button"
@@ -328,13 +328,13 @@ const Login = () => {
                 className="cyber-demo-btn"
               >
                 <UserCheck size={13} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '3px' }} />
-                Faculty Key
+                Faculty
               </button>
             </div>
 
             <div className="text-center mt-3">
-              <a href="#forgot" onClick={(e) => { e.preventDefault(); setError('Contact campus registrar desk to reset your institutional credentials.'); }} className="btn-link" style={{ fontSize: '0.84rem' }}>
-                Forgot your credentials?
+              <a href="#forgot" onClick={(e) => { e.preventDefault(); setError('Please contact your college administrator or department coordinator to reset your password.'); }} className="btn-link" style={{ fontSize: '0.84rem' }}>
+                Forgot your password?
               </a>
             </div>
           </form>

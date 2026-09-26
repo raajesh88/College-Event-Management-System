@@ -45,21 +45,20 @@ const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
         <div className="form text-center">
           <div className="mb-2">
             <span className="inst-badge" style={{ fontSize: '0.72rem', letterSpacing: '0.08em' }}>
-              COLLEGIATE ARCHIVAL VOUCHER
+              COLLEGE EVENT SYSTEM
             </span>
           </div>
 
           <h2 className="c1" style={{ fontSize: '1.85rem', marginBottom: '0.35rem' }}>
-            Conclude Academic Session
+            Sign Out
           </h2>
           <p className="c2" style={{ marginBottom: '1.5rem', fontSize: '0.95rem', color: '#5c4c3e' }}>
-            Are you sure you wish to close your journal session? Your registered event passes,
-            credentials, and verified certificates will remain safely archived.
+            Are you sure you want to sign out? Your registered events and passes are safely saved.
           </p>
 
           {loggingOut ? (
             <div style={{ padding: '1rem 0' }}>
-              <CapybaraLoader message="Safely archiving session records..." />
+              <CapybaraLoader message="Signing you out..." />
             </div>
           ) : (
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
@@ -70,7 +69,7 @@ const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
                 data-auth="signout"
                 style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem' }}
               >
-                <LogOut size={16} /> Confirm Departure
+                <LogOut size={16} /> Sign Out
               </button>
               <button
                 type="button"
@@ -78,7 +77,7 @@ const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
                 className="btn btn-outline"
                 style={{ flex: 1 }}
               >
-                Resume Journal
+                Cancel
               </button>
             </div>
           )}

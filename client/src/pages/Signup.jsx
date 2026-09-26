@@ -136,10 +136,10 @@ const Signup = () => {
       const is503 = err.response?.status === 503 || err.code === 'ERR_NETWORK' || !err.response;
       if (is503) {
         // If server database is in cold-start, seamlessly permit entry to login
-        setSuccessMsg('Account charter recorded! Redirecting to Portal Sign In...');
+        setSuccessMsg('Account created successfully! Redirecting to Sign In...');
         setTimeout(() => {
           navigate('/login', {
-            state: { registeredEmail: formData.email, message: 'Enrollment dossier ready! Please sign in with your passkey.' },
+            state: { registeredEmail: formData.email, message: 'Account ready! Please sign in with your email and password.' },
           });
         }, 1000);
         return;
@@ -162,15 +162,15 @@ const Signup = () => {
           <form onSubmit={handleSubmit} className="form" noValidate>
             <div className="text-center mb-2">
               <span className="inst-badge" style={{ fontSize: '0.72rem', letterSpacing: '0.08em' }}>
-                COLLEGIATE MATRICULATION REGISTRY • EST. 1926
+                COLLEGE EVENT MANAGEMENT SYSTEM
               </span>
             </div>
 
             <h1 className="c1" style={{ fontSize: '2.15rem', marginBottom: '0.25rem', textAlign: 'center' }}>
-              Scholar Enrollment Charter
+              Create Your Account
             </h1>
             <p className="c2" style={{ marginBottom: '1.25rem', fontSize: '0.98rem', textAlign: 'center' }}>
-              Register your academic portfolio to participate in hackathons, cultural fests, and varsity sports
+              Sign up to participate in hackathons, cultural fests, workshops, and sports events
             </p>
 
             {/* Error Banner */}
@@ -190,7 +190,7 @@ const Signup = () => {
             )}
 
             {/* Role Selection */}
-            <label className="cyber-label">Select Academic Role</label>
+            <label className="cyber-label">Select Your Role</label>
             <div className="cyber-role-selector">
               <button
                 type="button"
@@ -198,7 +198,7 @@ const Signup = () => {
                 onClick={() => handleRoleSelect('student')}
               >
                 <GraduationCap size={18} />
-                <span>Enrolled Scholar</span>
+                <span>Student</span>
               </button>
               <button
                 type="button"
@@ -206,7 +206,7 @@ const Signup = () => {
                 onClick={() => handleRoleSelect('organizer')}
               >
                 <Briefcase size={18} />
-                <span>Faculty Registrar</span>
+                <span>Faculty / Organizer</span>
               </button>
             </div>
 
@@ -230,7 +230,7 @@ const Signup = () => {
 
               <div>
                 <label className="cyber-label" htmlFor="signup-email">
-                  Institutional / Personal Email
+                  College / Personal Email
                 </label>
                 <input
                   id="signup-email"
@@ -247,7 +247,7 @@ const Signup = () => {
 
             {/* Department */}
             <label className="cyber-label" htmlFor="signup-dept">
-              Academic Department
+              Department
             </label>
             <select
               id="signup-dept"
@@ -257,7 +257,7 @@ const Signup = () => {
               className="input clean-select"
               required
             >
-              <option value="">-- Choose academic department --</option>
+              <option value="">-- Select Your Department --</option>
               {departmentsList.map((dept) => (
                 <option key={dept} value={dept}>
                   {dept}
@@ -269,14 +269,14 @@ const Signup = () => {
             <div className="cyber-grid-2">
               <div>
                 <label className="cyber-label" htmlFor="signup-password">
-                  Passkey (min 6 chars)
+                  Password (min 6 characters)
                 </label>
                 <div style={{ position: 'relative' }}>
                   <input
                     id="signup-password"
                     name="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Create passkey"
+                    placeholder="Create password"
                     value={formData.password}
                     onChange={handleChange}
                     className="input"
@@ -304,14 +304,14 @@ const Signup = () => {
 
               <div>
                 <label className="cyber-label" htmlFor="signup-confirm">
-                  Confirm Passkey
+                  Confirm Password
                 </label>
                 <div style={{ position: 'relative' }}>
                   <input
                     id="signup-confirm"
                     name="confirmPassword"
                     type={showConfirmPassword ? 'text' : 'password'}
-                    placeholder="Repeat passkey"
+                    placeholder="Re-enter password"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     className="input"
@@ -341,12 +341,12 @@ const Signup = () => {
             {/* Loader or Submit Buttons */}
             {loading ? (
               <div style={{ padding: '0.75rem 0' }}>
-                <CapybaraLoader message="Registering your matriculation charter..." />
+                <CapybaraLoader message="Creating your account..." />
               </div>
             ) : (
               <div style={{ display: 'flex', gap: '1rem', marginTop: '1.25rem' }}>
                 <button type="submit" disabled={loading} className="btn btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                  <span>Seal Matriculation Charter</span> <ArrowRight size={16} />
+                  <span>Create Account</span> <ArrowRight size={16} />
                 </button>
                 <Link to="/login" className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   Sign In
@@ -356,8 +356,8 @@ const Signup = () => {
 
             {/* Footer Navigation */}
             <div style={{ textAlign: 'center', marginTop: '1.25rem', color: '#6d5b4d', fontSize: '0.9rem' }}>
-              <span>Already hold an academic registry key? </span>
-              <Link to="/login" className="btn-link" data-auth="signin">Access Portal Here</Link>
+              <span>Already have an account? </span>
+              <Link to="/login" className="btn-link" data-auth="signin">Sign In here</Link>
             </div>
           </form>
         </div>

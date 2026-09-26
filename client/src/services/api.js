@@ -39,7 +39,7 @@ const getBaseURL = () => {
     }
   }
 
-  return 'https://college-event-management-system-3-5atj.onrender.com/api';
+  return 'https://college-event-management-system-1-p5mx.onrender.com/api';
 };
 
 // Base API configuration
@@ -48,7 +48,7 @@ const API = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 35000, // 35 seconds to accommodate Render free-tier cold start
+  timeout: 45000, // 45 seconds to accommodate Render free-tier cold start
 });
 
 // Request Interceptor: Automatically attach JWT Token to Authorization header
