@@ -12,11 +12,8 @@ import {
   Clock,
   MapPin,
   Search,
-  BookOpen,
   Award,
-  Users,
   LogOut,
-  Sparkles,
   Check,
   AlertCircle,
   Building,
@@ -24,15 +21,9 @@ import {
   GraduationCap,
   QrCode,
   ShieldCheck,
-  RefreshCw,
   BellRing,
   Download,
-  ExternalLink,
   ChevronRight,
-  Bookmark,
-  FileText,
-  UserCheck,
-  CheckSquare,
   Compass,
 } from 'lucide-react';
 
@@ -251,7 +242,7 @@ const StudentDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCat, setSelectedCat] = useState('All');
   const [toastMessage, setToastMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [_isLoading, setIsLoading] = useState(false);
   const [selectedPassForQR, setSelectedPassForQR] = useState(null);
   const [themedModalEvent, setThemedModalEvent] = useState(null);
 
@@ -410,7 +401,7 @@ const StudentDashboard = () => {
     });
   };
 
-  const handleConfirmThemedRegistration = async (targetEvent, customFormData) => {
+  const handleConfirmThemedRegistration = async (targetEvent, _customFormData) => {
     try {
       const res = await registrationService.register(targetEvent.id);
       const passCode =

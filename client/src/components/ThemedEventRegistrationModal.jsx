@@ -8,20 +8,13 @@ import {
   Printer,
   Award,
   ShieldCheck,
-  Terminal,
   Code2,
-  Sparkles,
   Music,
   Trophy,
   Cpu,
   BookOpen,
-  Users,
-  Flame,
   Check,
-  Download,
-  AlertTriangle,
   ArrowRight,
-  ExternalLink,
 } from 'lucide-react';
 
 /**
@@ -214,9 +207,7 @@ const ThemedEventRegistrationModal = ({
   onClose,
   onConfirmRegistration,
 }) => {
-  if (!event) return null;
-
-  const themeKey = getEventThemeKey(event.category);
+  const themeKey = getEventThemeKey(event?.category);
   const theme = THEME_CONFIGS[themeKey] || THEME_CONFIGS.workshop;
   const ThemeIcon = theme.icon;
 
@@ -228,8 +219,8 @@ const ThemedEventRegistrationModal = ({
   const [formData, setFormData] = useState({
     studentName: student?.name || 'Alex Rivera',
     studentEmail: student?.email || 'alex.rivera@college.edu',
-    rollNumber: student?.rollNumber || `CS-2024-${Math.floor(1000 + Math.random() * 9000)}`,
-    department: student?.department || event.department || 'Computer Science & Engineering',
+    rollNumber: student?.rollNumber || 'CS-2024-8842',
+    department: student?.department || event?.department || 'Computer Science & Engineering',
     track: theme.tracks[0],
     participationType: themeKey === 'hackathon' ? 'Team Lead (2-4 Members)' : 'Individual Delegate',
     teamName: themeKey === 'hackathon' ? 'CodeNexus Crew' : '',
@@ -240,19 +231,21 @@ const ThemedEventRegistrationModal = ({
 
   const [activePass, setActivePass] = useState(
     passData || {
-      passCode: `PASS-${theme.passPrefix}-${event.id?.toString().slice(-4).toUpperCase() || '8842'}`,
-      title: event.title,
-      category: event.category,
-      department: event.department,
-      date: event.date,
-      time: event.time || '10:00 AM - 05:00 PM',
-      venue: event.venue,
+      passCode: `PASS-${theme.passPrefix}-${event?.id?.toString().slice(-4).toUpperCase() || '8842'}`,
+      title: event?.title || '',
+      category: event?.category || '',
+      department: event?.department || '',
+      date: event?.date || '',
+      time: event?.time || '10:00 AM - 05:00 PM',
+      venue: event?.venue || '',
       studentName: student?.name || 'Alex Rivera',
       studentEmail: student?.email || 'alex.rivera@college.edu',
       rollNumber: student?.rollNumber || 'CS-2024-8842',
       track: theme.tracks[0],
     }
   );
+
+  if (!event) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();

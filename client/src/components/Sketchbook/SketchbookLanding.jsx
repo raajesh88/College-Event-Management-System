@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import PaperBackground from './PaperBackground';
 import SketchbookPage from './SketchbookPage';
 import PageTurn from './PageTurn';
@@ -10,7 +10,6 @@ import {
   WashiTape,
   WaxSeal,
   PostalStamp,
-  HandDrawnArrow,
   HandUnderline,
 } from './BotanicalDecor';
 import {
@@ -30,7 +29,6 @@ import {
   Users,
   ShieldCheck,
   Check,
-  Layers,
   Award,
 } from 'lucide-react';
 
@@ -50,7 +48,6 @@ const SketchbookLanding = ({
   user,
   showToast,
 }) => {
-  const navigate = useNavigate();
 
   // Sketchbook Page State
   const [currentPage, setCurrentPage] = useState(0);

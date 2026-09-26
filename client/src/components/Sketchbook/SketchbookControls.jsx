@@ -2,12 +2,9 @@ import React from 'react';
 import {
   ZoomIn,
   ZoomOut,
-  RotateCcw,
   ChevronLeft,
   ChevronRight,
   Eye,
-  BookOpen,
-  Sparkles,
 } from 'lucide-react';
 
 /**

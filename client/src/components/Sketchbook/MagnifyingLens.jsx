@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Sparkles, Move, Eye, Minimize2, RotateCcw } from 'lucide-react';
+import { Move, Minimize2, RotateCcw } from 'lucide-react';
 
 /**
  * MagnifyingLens
@@ -19,7 +19,6 @@ const MagnifyingLens = ({
   // Visual state to trigger render
   const [lensPos, setLensPos] = useState({ x: defaultPos.x, y: defaultPos.y });
   const [isDragging, setIsDragging] = useState(false);
-  const [inspectedMode, setInspectedMode] = useState('notes'); // 'notes' | 'zoom'
 
   const animFrameId = useRef(null);
   const isMoving = useRef(false);
@@ -101,7 +100,7 @@ const MagnifyingLens = ({
       if (lensRef.current && lensRef.current.hasPointerCapture(e.pointerId)) {
         lensRef.current.releasePointerCapture(e.pointerId);
       }
-    } catch (_) {}
+    } catch {}
   };
 
   // Reset to default dock position

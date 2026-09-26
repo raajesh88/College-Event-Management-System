@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -13,7 +13,6 @@ import {
   PLATFORM_STATS,
   CONTACT_CARDS,
   FALLBACK_EVENT_IMAGE,
-  HERO_BACKGROUND_IMAGE,
 } from '../data/landingData';
 import {
   Calendar,
@@ -175,24 +174,6 @@ const Landing = () => {
     }, 4000);
   };
 
-  // Direct handlers for active in-image buttons
-  const handleExploreEvents = (e) => {
-    if (e) e.preventDefault();
-    setSelectedCategory('All');
-    const el = document.getElementById('events');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const handleHeroBadgeSelect = (categoryName) => {
-    setSelectedCategory(categoryName);
-    const el = document.getElementById('events');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   // Handle Event Registration directly from Landing Page - Opens Category Themed Template Modal
   const handleRegisterClick = (event) => {
     if (!token) {
@@ -211,7 +192,7 @@ const Landing = () => {
     setThemedModalEvent(event);
   };
 
-  const handleConfirmThemedRegistration = async (event, customFormData) => {
+  const handleConfirmThemedRegistration = async (event, _customFormData) => {
     try {
       setRegisteringId(event.id);
       const res = await registrationService.register(event.id);

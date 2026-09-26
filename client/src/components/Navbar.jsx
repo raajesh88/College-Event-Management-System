@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import LogoutModal from './LogoutModal';
-import { Calendar, User, LogOut, Menu, X, Sparkles, PlusCircle, CheckSquare, Layers } from 'lucide-react';
+import { Calendar, User, LogOut, Menu, X, PlusCircle, CheckSquare, Layers } from 'lucide-react';
 
 const Navbar = ({ activeTab, onTabChange }) => {
   const { user, token, logout } = useAuth();
@@ -213,25 +213,25 @@ const Navbar = ({ activeTab, onTabChange }) => {
             <div className="mobile-links">
               <button
                 className={`mobile-tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-                onClick={() => { onTabChange && onTabChange('dashboard'); closeMobile(); }}
+                onClick={() => { onTabChange?.('dashboard'); closeMobile(); }}
               >
                 Dashboard
               </button>
               <button
                 className={`mobile-tab-btn ${activeTab === 'events' ? 'active' : ''}`}
-                onClick={() => { onTabChange && onTabChange('events'); closeMobile(); }}
+                onClick={() => { onTabChange?.('events'); closeMobile(); }}
               >
                 Events
               </button>
               <button
                 className={`mobile-tab-btn ${activeTab === 'registrations' ? 'active' : ''}`}
-                onClick={() => { onTabChange && onTabChange('registrations'); closeMobile(); }}
+                onClick={() => { onTabChange?.('registrations'); closeMobile(); }}
               >
                 My Registrations
               </button>
               <button
                 className={`mobile-tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
-                onClick={() => { onTabChange && onTabChange('profile'); closeMobile(); }}
+                onClick={() => { onTabChange?.('profile'); closeMobile(); }}
               >
                 Profile
               </button>
@@ -242,31 +242,31 @@ const Navbar = ({ activeTab, onTabChange }) => {
             <div className="mobile-links">
               <button
                 className={`mobile-tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-                onClick={() => { onTabChange && onTabChange('dashboard'); closeMobile(); }}
+                onClick={() => { onTabChange?.('dashboard'); closeMobile(); }}
               >
                 Dashboard
               </button>
               <button
                 className={`mobile-tab-btn ${activeTab === 'create-event' ? 'active' : ''}`}
-                onClick={() => { onTabChange && onTabChange('create-event'); closeMobile(); }}
+                onClick={() => { onTabChange?.('create-event'); closeMobile(); }}
               >
                 Create Event
               </button>
               <button
                 className={`mobile-tab-btn ${activeTab === 'manage-events' ? 'active' : ''}`}
-                onClick={() => { onTabChange && onTabChange('manage-events'); closeMobile(); }}
+                onClick={() => { onTabChange?.('manage-events'); closeMobile(); }}
               >
                 Manage Events
               </button>
               <button
                 className={`mobile-tab-btn ${activeTab === 'participants' ? 'active' : ''}`}
-                onClick={() => { onTabChange && onTabChange('participants'); closeMobile(); }}
+                onClick={() => { onTabChange?.('participants'); closeMobile(); }}
               >
                 Participants
               </button>
               <button
                 className={`mobile-tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
-                onClick={() => { onTabChange && onTabChange('profile'); closeMobile(); }}
+                onClick={() => { onTabChange?.('profile'); closeMobile(); }}
               >
                 Profile
               </button>

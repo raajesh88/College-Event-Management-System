@@ -4,7 +4,10 @@
   "private": true,
   "description": "College Event Management System - Full Stack Application",
   "scripts": {
-    "build": "npm install --prefix server && npm install --prefix client && npm run build --prefix client",
+    "build": "npm install --prefix client && npm run build --prefix client && node -e \"const fs = require('fs'); if (fs.existsSync('client/dist')) { fs.cpSync('client/dist', 'dist', { recursive: true }); fs.cpSync('client/dist', 'public', { recursive: true }); }\"",
+    "build:client": "npm install --prefix client && npm run build --prefix client",
+    "build:server": "npm install --prefix server",
+    "build:all": "npm install --prefix server && npm install --prefix client && npm run build --prefix client && node -e \"const fs = require('fs'); if (fs.existsSync('client/dist')) { fs.cpSync('client/dist', 'dist', { recursive: true }); fs.cpSync('client/dist', 'public', { recursive: true }); }\"",
     "start": "node server/server.js",
     "server": "node server/server.js",
     "client": "npm run dev --prefix client",
@@ -14,6 +17,6 @@
   "author": "",
   "license": "ISC",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0 <23.0.0"
   }
 }

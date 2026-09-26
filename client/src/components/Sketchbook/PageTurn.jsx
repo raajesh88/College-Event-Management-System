@@ -9,26 +9,27 @@ import React, { useState, useEffect, useRef } from 'react';
  */
 const PageTurn = ({
   children,
-  currentPage = 0,
-  totalPages = 5,
+  _currentPage = 0,
+  _totalPages = 5,
   isTurning = false,
   turnDirection = 'next', // 'next' | 'prev'
   onTurnEnd,
 }) => {
   const [turningState, setTurningState] = useState('idle'); // 'idle' | 'turning'
+  const [isReducedMotion, setIsReducedMotion] = useState(false);
   const turnTimeoutRef = useRef(null);
 
-  // Check user preference for reduced motion
-  const prefersReducedMotion = useRef(
-    typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  );
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setIsReducedMotion(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (isTurning && turningState === 'idle') {
       setTurningState('turning');
 
-      const duration = prefersReducedMotion.current ? 300 : 750;
+      const duration = isReducedMotion ? 300 : 750;
       turnTimeoutRef.current = setTimeout(() => {
         setTurningState('idle');
         if (onTurnEnd) onTurnEnd();
@@ -38,13 +39,13 @@ const PageTurn = ({
     return () => {
       if (turnTimeoutRef.current) clearTimeout(turnTimeoutRef.current);
     };
-  }, [isTurning, onTurnEnd]);
+  }, [isTurning, turningState, isReducedMotion, onTurnEnd]);
 
   return (
     <div
       className={`sketchbook-3d-stage ${
         turningState === 'turning' ? `is-turning turn-${turnDirection}` : ''
-      } ${prefersReducedMotion.current ? 'reduced-motion' : ''}`}
+      } ${isReducedMotion ? 'reduced-motion' : ''}`}
     >
       {/* 3D Journal Spine Center Shadow */}
       <div className="sketchbook-center-spine" aria-hidden="true">

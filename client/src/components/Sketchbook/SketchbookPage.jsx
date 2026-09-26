@@ -40,7 +40,7 @@ const SketchbookPage = ({
     >
       {/* Deckled Edge Paper Border */}
       <div className="page-deckled-edge-left" aria-hidden="true" />
-      <div className="page-deckled-edge-right" aria-hidden="true" />
+      <div className="page-deckled-edge-right" aria-hidden="true" style={parallaxDecor} />
 
       {/* Ruled Notebook / Ledger Header */}
       <header className="page-editorial-header">

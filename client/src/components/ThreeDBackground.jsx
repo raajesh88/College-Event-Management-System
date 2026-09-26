@@ -12,7 +12,7 @@ import * as THREE from 'three';
  *
  * Includes mouse-driven camera parallax, floating physics, and vibrant ambient lighting.
  */
-const ThreeDBackground = ({ activeCategory = 'All' }) => {
+const ThreeDBackground = ({ _activeCategory = 'All' }) => {
   const mountRef = useRef(null);
 
   useEffect(() => {

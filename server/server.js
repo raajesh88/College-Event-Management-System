@@ -3,7 +3,11 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
-// Load environment variables
+const path = require('path');
+const fs = require('fs');
+
+// Load environment variables reliably whether run from server dir or root
+dotenv.config({ path: path.join(__dirname, '.env') });
 dotenv.config();
 
 const connectDB = require('./config/db');
@@ -325,7 +329,27 @@ app.use('/api/auth', authRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/registrations', registrationRoutes);
 
-// 404 Route Not Found Handler
+// Serve static client assets if built (for fullstack Render or production hosting)
+const clientDistPath = path.join(__dirname, '../client/dist');
+const rootDistPath = path.join(__dirname, '../dist');
+const staticPath = fs.existsSync(clientDistPath)
+  ? clientDistPath
+  : fs.existsSync(rootDistPath)
+    ? rootDistPath
+    : null;
+
+if (staticPath) {
+  app.use(express.static(staticPath));
+  // Any non-API request serves the React index.html for client-side routing (Express 5 compatible)
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api')) {
+      return res.sendFile(path.join(staticPath, 'index.html'));
+    }
+    next();
+  });
+}
+
+// 404 Route Not Found Handler (for API routes or when static build not present)
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -345,9 +369,9 @@ app.use((err, req, res, next) => {
 // Start Server if not loaded as a module in serverless function
 const PORT = process.env.PORT || 5000;
 if (!process.env.VERCEL) {
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`===============================================`);
-    console.log(`College Event Management Server running on port ${PORT}`);
+    console.log(`College Event Management Server running on port ${PORT} (0.0.0.0)`);
     console.log(`API URL: http://localhost:${PORT}/api`);
     console.log(`Auth Endpoints: http://localhost:${PORT}/api/auth`);
     console.log(`Events Endpoints: http://localhost:${PORT}/api/events`);
