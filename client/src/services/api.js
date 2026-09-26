@@ -65,10 +65,24 @@ API.interceptors.request.use(
   }
 );
 
-// Response Interceptor: Handle common response errors
+// Response Interceptor: Handle common response errors and retry on cloud cold-start 503
 API.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Retry once on 503 or transient 502/504 if backend is waking up
+    if (
+      originalRequest &&
+      !originalRequest._retry &&
+      error.response &&
+      [502, 503, 504].includes(error.response.status)
+    ) {
+      originalRequest._retry = true;
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      return API(originalRequest);
+    }
+
     // If token is invalid or expired, clear local storage and redirect to login
     if (error.response && error.response.status === 401) {
       const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
